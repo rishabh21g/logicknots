@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import TabHeader from "./TabHeader";
 import TabPanel from "./TabPanel";
 
-const ReportBugandImprovement = () => {
+const ReportBugandImprovement = ({ tabs }) => {
   const Tabs = [
     {
       key: "bug",
@@ -20,18 +20,18 @@ const ReportBugandImprovement = () => {
       color: "blue",
     },
   ];
-  const [activeTab, setactiveTab] = useState("bug");
+  const [currentTab, setCurrentTab] = tabs;
 
   return (
     <div className="md:max-w-[30rem] md:h-1/2 h-1/4 max-w-[20rem] bg-neutral-900 absolute w-full p-4 m-10 rounded-md shadow-sm cursor-pointer">
       <TabHeader
         tabs={Tabs}
-        activeTab={activeTab}
-        setactiveTab={setactiveTab}
+        activeTab={currentTab}
+        setactiveTab={setCurrentTab}
       />
       <TabPanel
-        tab={activeTab}
-        color={Tabs.find((t) => t.key === activeTab).color}
+        tab={currentTab}
+        color={Tabs.find((t) => t.key === currentTab).color}
       />
     </div>
   );

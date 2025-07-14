@@ -1,7 +1,6 @@
 import React from "react";
 
 const TabHeader = ({ tabs, activeTab, setactiveTab }) => {
-  console.log(tabs);
   return (
     <div className="flex gap-2 mb-1">
       {tabs.map((tab) => {
@@ -16,7 +15,9 @@ const TabHeader = ({ tabs, activeTab, setactiveTab }) => {
                         : "bg-neutral-700 text-gray-300"
                     }`}
             key={tab.key}
-            onClick={() => setactiveTab(tab.key)}
+            onClick={() => {
+              setactiveTab(tab.key);
+            }}
           >
             {tab.lable}
           </button>

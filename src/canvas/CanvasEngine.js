@@ -1,21 +1,11 @@
 // ✅ Modular and readable CanvasEngine.js with original logic preserved
 
-
-
-
-
-
-
 // ⬇️ Outside class export default CanvasEngine
-
-
-
-
 
 export default class CanvasEngine {
   constructor(canvas) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
+    this.ctx = canvas.getContext("2d");
     this.dpr = window.devicePixelRatio || 1;
     this.showGrid = true;
 
@@ -24,34 +14,19 @@ export default class CanvasEngine {
     this.scale = 1;
     this.isPanning = false;
     this.isDragging = false;
-this.dragOffset = { x: 0, y: 0 };
-this.dragTarget = null;
-this.gridSpacing = 20; // ✅ Default spacing
-window.canvasEngine = this; // 👈 expose globally
+    this.dragOffset = { x: 0, y: 0 };
+    this.dragTarget = null;
+    this.onCanvasClick = null; // Callback for canvas clicks
+    this.gridSpacing = 20; // ✅ Default spacing
+    window.canvasEngine = this; // 👈 expose globally
 
-this.gridColor = "#444"; // default grid color
-
+    this.gridColor = "#444"; // default grid color
 
     this.startPan = { x: 0, y: 0 };
     this.setupCanvas();
-   
-    
-    
-    
-
-
-
-
 
     this.dashOffset = 0; // animation ke liye offset
 
-
-
-    
-
-    
-   
-   
     this.bindEvents();
     this.draw();
   }
@@ -61,26 +36,35 @@ this.gridColor = "#444"; // default grid color
     this.canvas.width = rect.width * this.dpr;
     this.canvas.height = rect.height * this.dpr;
     this.ctx.scale(this.dpr, this.dpr);
-  
+
     // ✅ Center origin
     this.offsetX = this.canvas.width / (2 * this.dpr);
     this.offsetY = this.canvas.height / (2 * this.dpr);
   }
-  
 
   bindEvents() {
     this.canvas.addEventListener("wheel", this.handleZoom.bind(this));
-   
-   
+    this.canvas.addEventListener("click", this.handleCanvasClick.bind(this));
 
-    
-    
-
-    
-    
   }
 
- 
+  handleCanvasClick(e) {
+    if (this.onCanvasClick) {
+      const rect = this.canvas.getBoundingClientRect();
+      const canvasX = e.clientX - rect.left;
+      const canvasY = e.clientY - rect.top;
+
+      // Transform screen coordinates to world coordinates
+      const worldX = (canvasX - this.offsetX) / this.scale;
+      const worldY = (canvasY - this.offsetY) / this.scale;
+
+      this.onCanvasClick(worldX, worldY, e);
+    }
+  }
+
+  setCanvasClickHandler(handler) {
+    this.onCanvasClick = handler;
+  }
 
   handleZoom(e) {
     e.preventDefault();
@@ -99,9 +83,6 @@ this.gridColor = "#444"; // default grid color
     this.draw();
   }
 
- 
-  
-
   drawGrid() {
     const ctx = this.ctx;
     const spacing = this.gridSpacing; // 👈 dynamic value
@@ -109,20 +90,19 @@ this.gridColor = "#444"; // default grid color
     const height = this.canvas.height / this.dpr;
     ctx.strokeStyle = this.gridColor || "#444";
 
-  
     ctx.save();
     ctx.clearRect(0, 0, width, height);
     ctx.translate(this.offsetX, this.offsetY);
     ctx.scale(this.scale, this.scale);
-  
+
     const startX = -this.offsetX / this.scale;
     const startY = -this.offsetY / this.scale;
     const endX = startX + width / this.scale;
     const endY = startY + height / this.scale;
-  
+
     const firstX = Math.floor(startX / spacing) * spacing;
     const firstY = Math.floor(startY / spacing) * spacing;
-  
+
     ctx.beginPath();
     for (let x = firstX; x <= endX; x += spacing) {
       ctx.moveTo(x, startY);
@@ -132,8 +112,7 @@ this.gridColor = "#444"; // default grid color
       ctx.moveTo(startX, y);
       ctx.lineTo(endX, y);
     }
-  
-    
+
     ctx.lineWidth = 1 / this.scale;
     ctx.stroke();
     ctx.restore();
@@ -142,47 +121,53 @@ this.gridColor = "#444"; // default grid color
     this.gridSpacing = spacing;
     this.draw();
   }
-    
-
- 
 
   startDrag(e) {
     this.recordState();
     if (!this.selectedObjects?.length) return;
-  
+
     const x = (e.offsetX - this.offsetX) / this.scale;
     const y = (e.offsetY - this.offsetY) / this.scale;
-  
+
     // Check if clicked inside any selected object
     for (let obj of this.selectedObjects) {
       const item = obj.ref;
-      if (obj.type === 'rectangle') {
-        if (x >= item.x && x <= item.x + item.width && y >= item.y && y <= item.y + item.height) {
+      if (obj.type === "rectangle") {
+        if (
+          x >= item.x &&
+          x <= item.x + item.width &&
+          y >= item.y &&
+          y <= item.y + item.height
+        ) {
           this.dragStart = { x, y };
-          this.initialPositions = this.selectedObjects.map(obj => ({
+          this.initialPositions = this.selectedObjects.map((obj) => ({
             id: obj.id,
             type: obj.type,
             startX: obj.ref.x,
-            startY: obj.ref.y
+            startY: obj.ref.y,
           }));
           this.isDragging = true;
           return;
         }
-      }
-      else if (obj.type === 'label') {
+      } else if (obj.type === "label") {
         const width = this.ctx.measureText(item.text).width;
         const height = item.fontSize;
-        if (x >= item.x && x <= item.x + width && y <= item.y && y >= item.y - height) {
+        if (
+          x >= item.x &&
+          x <= item.x + width &&
+          y <= item.y &&
+          y >= item.y - height
+        ) {
           if (item.locked) {
-            console.log('🔒 Cannot drag locked label');
+            console.log("🔒 Cannot drag locked label");
             return;
           }
           this.dragStart = { x, y };
-          this.initialPositions = this.selectedObjects.map(obj => ({
+          this.initialPositions = this.selectedObjects.map((obj) => ({
             id: obj.id,
             type: obj.type,
             startX: obj.ref.x,
-            startY: obj.ref.y
+            startY: obj.ref.y,
           }));
           this.isDragging = true;
           return;
@@ -191,38 +176,37 @@ this.gridColor = "#444"; // default grid color
     }
   }
 
-
   performDrag(e) {
     if (!this.isDragging || !this.dragStart || !this.initialPositions) return;
-  
+
     const x = (e.offsetX - this.offsetX) / this.scale;
     const y = (e.offsetY - this.offsetY) / this.scale;
-  
+
     const dx = this.snapToGrid(x - this.dragStart.x);
     const dy = this.snapToGrid(y - this.dragStart.y);
-  
+
     for (let obj of this.selectedObjects) {
-      if (obj.type === 'label' && obj.ref.locked) {
-        console.log('🔒 Skip dragging locked label');
+      if (obj.type === "label" && obj.ref.locked) {
+        console.log("🔒 Skip dragging locked label");
         continue;
       }
-      const init = this.initialPositions.find(init => init.id === obj.id && init.type === obj.type);
+      const init = this.initialPositions.find(
+        (init) => init.id === obj.id && init.type === obj.type
+      );
       if (init) {
         obj.ref.x = init.startX + dx;
         obj.ref.y = init.startY + dy;
       }
     }
-  
+
     this.draw();
   }
-  
-  
+
   stopDrag() {
     this.isDragging = false;
     this.dragStart = null;
     this.initialPositions = null;
   }
-  
 
   enterMultiMoveMode() {
     if (!this.selectedObjects.length) return;
@@ -231,48 +215,47 @@ this.gridColor = "#444"; // default grid color
     console.log("🚀 Multi-Move Mode READY (waiting for click)");
   }
 
-
   startMultiMoveFromClick(e) {
     this.recordState();
     if (!this.isMultiMoveMode) return;
-  
+
     const pointerX = (e.offsetX - this.offsetX) / this.scale;
     const pointerY = (e.offsetY - this.offsetY) / this.scale;
-  
+
     this.dragStart = { x: pointerX, y: pointerY };
-    this.initialPositions = this.selectedObjects.map(obj => ({
+    this.initialPositions = this.selectedObjects.map((obj) => ({
       id: obj.id,
       type: obj.type,
       startX: obj.ref.x,
-      startY: obj.ref.y
+      startY: obj.ref.y,
     }));
-  
+
     this.isDragging = true;
     this.isMultiMoveMode = false; // ✅ Click ke baad mode off
     console.log("🎯 Multi-Move STARTED from click:", this.dragStart);
   }
-  
+
   updateMultiMoveFollow(e) {
     if (!this.isDragging || !this.initialPositions) return;
-  
+
     const x = (e.offsetX - this.offsetX) / this.scale;
     const y = (e.offsetY - this.offsetY) / this.scale;
-  
+
     const dx = this.snapToGrid(x - this.dragStart.x);
     const dy = this.snapToGrid(y - this.dragStart.y);
-  
+
     for (let obj of this.selectedObjects) {
-      const init = this.initialPositions.find(init => init.id === obj.id && init.type === obj.type);
+      const init = this.initialPositions.find(
+        (init) => init.id === obj.id && init.type === obj.type
+      );
       if (init) {
         obj.ref.x = init.startX + dx;
         obj.ref.y = init.startY + dy;
       }
     }
-  
+
     this.draw();
   }
-
-
 
   exitMultiMoveMode() {
     this.isMultiMoveMode = false;
@@ -282,56 +265,36 @@ this.gridColor = "#444"; // default grid color
     console.log("🛑 Multi-Move Mode OFF");
   }
 
-
-
-
-
-
-
-
-
-
-
-
-  
-
   draw() {
-    
-   
-    
     const ctx = this.ctx;
 
     if (this.showGrid) {
       this.drawGrid();
     } else {
       ctx.save();
-      ctx.clearRect(0, 0, this.canvas.width / this.dpr, this.canvas.height / this.dpr);
+      ctx.clearRect(
+        0,
+        0,
+        this.canvas.width / this.dpr,
+        this.canvas.height / this.dpr
+      );
       ctx.restore();
     }
-    
-    
-    
-    
-  
-   
-  
+
     // ✅ DRAW CROSS ORIGIN AXIS (always visible and 1px thin)
     ctx.save();
     ctx.translate(this.offsetX, this.offsetY);
     ctx.scale(this.scale, this.scale);
-  
+
     ctx.beginPath();
     ctx.moveTo(-100000, 0);
     ctx.lineTo(100000, 0);
     ctx.moveTo(0, -100000);
     ctx.lineTo(0, 100000);
-  
+
     ctx.lineWidth = 1 / this.scale;
     ctx.strokeStyle = "#ff0000";
     ctx.stroke();
     ctx.restore();
   }
-  
-
-  
 }
