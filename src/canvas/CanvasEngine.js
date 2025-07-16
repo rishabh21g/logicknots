@@ -45,7 +45,21 @@ export default class CanvasEngine {
   bindEvents() {
     this.canvas.addEventListener("wheel", this.handleZoom.bind(this));
     this.canvas.addEventListener("click", this.handleCanvasClick.bind(this));
+  }
 
+  //add dot for bug improvement and query
+  drawDot(x, y, radius = 5, color = "yellow") {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.translate(this.offsetX, this.offsetY);
+    ctx.scale(this.scale, this.scale);
+
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    ctx.restore();
   }
 
   handleCanvasClick(e) {

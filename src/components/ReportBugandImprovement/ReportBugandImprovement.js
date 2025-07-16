@@ -1,38 +1,20 @@
-import React, { useState } from "react";
 import TabHeader from "./TabHeader";
-import TabPanel from "./TabPanel";
+import SearchBox from "./SearchBox";
+import Functionality from "./Functionality";
+import QueryCountBox from "./QueryCountBox";
+import CommentDetails from "./CommentDetails";
 
-const ReportBugandImprovement = ({ tabs }) => {
-  const Tabs = [
-    {
-      key: "bug",
-      lable: "Bug",
-      color: "red",
-    },
-    {
-      key: "improvement",
-      lable: "Improvement",
-      color: "yellow",
-    },
-    {
-      key: "query",
-      lable: "Query",
-      color: "blue",
-    },
-  ];
-  const [currentTab, setCurrentTab] = tabs;
-
+const ReportBugandImprovement = () => {
   return (
-    <div className="md:max-w-[30rem] md:h-1/2 h-1/4 max-w-[20rem] bg-neutral-900 absolute w-full p-4 m-10 rounded-md shadow-sm cursor-pointer">
-      <TabHeader
-        tabs={Tabs}
-        activeTab={currentTab}
-        setactiveTab={setCurrentTab}
-      />
-      <TabPanel
-        tab={currentTab}
-        color={Tabs.find((t) => t.key === currentTab).color}
-      />
+    <div
+      className="md:max-w-[30rem] md:h-[40rem] h-1/4 max-w-[20rem] bg-black absolute w-full
+     p-4 m-10 rounded-md shadow-sm cursor-pointer top-3 left-6"
+    >
+      <TabHeader />
+      <Functionality />
+      <SearchBox />
+      <QueryCountBox />
+      <CommentDetails />
     </div>
   );
 };

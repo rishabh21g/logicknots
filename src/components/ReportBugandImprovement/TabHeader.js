@@ -1,28 +1,33 @@
 import React from "react";
+import { useCommentData } from "../../context/CommentDataContext";
 
-const TabHeader = ({ tabs, activeTab, setactiveTab }) => {
+const TabHeader = () => {
+  const { tabs, activeTab, setActiveTab } = useCommentData();
   return (
-    <div className="flex gap-2 mb-1">
-      {tabs.map((tab) => {
-        return (
-          <button
-            className={`shadow-md
-                       bg-neutral-800  p-3 
-                      text-center w-28 text-sm px-4 
+    <div className="flex mb-1 flex-col max-w-[22rem] mx-auto">
+      <h1 className="text-blue-600 font-bold text-center text-2xl ">
+        Design name
+      </h1>
+      <div className="flex  w-full justify-between mt-1">
+        {tabs.map((tab) => {
+          return (
+            <button
+              className={`shadow-md
+                         
+                      text-center w-28 text-sm px-4 font-semibold capitalize
                     rounded-lg ${
-                      activeTab === tab.key
-                        ? "text-gray-300 "
-                        : "bg-neutral-700 text-gray-300"
+                      activeTab === tab ? "text-blue-600 " : " text-gray-300"
                     }`}
-            key={tab.key}
-            onClick={() => {
-              setactiveTab(tab.key);
-            }}
-          >
-            {tab.lable}
-          </button>
-        );
-      })}
+              key={tab}
+              onClick={() => {
+                setActiveTab(tab);
+              }}
+            >
+              {tab}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };

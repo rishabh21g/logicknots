@@ -1,41 +1,37 @@
 import React, { useEffect, useRef } from "react";
 import CanvasEngine from "../canvas/CanvasEngine";
+import { useCommentData } from "../context/CommentDataContext";
 
-const CanvasBoard = (props) => {
-  const { onClickEvent } = props;
+const CanvasBoard = () => {
   const canvasRef = useRef(null);
   const engineRef = useRef(null);
+  const { isDotMode, setPendingDotCoords } = useCommentData();
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (canvas) {
+    if (canvas && !engineRef.current) {
       engineRef.current = new CanvasEngine(canvas);
       window.canvasEngine = engineRef.current;
-      engineRef.current.setCanvasClickHandler((x, y, e) => {
-        // console.log("Clicked at world coordinates:", x, y, e);
-        onClickEvent(x, y, e);
-      });
     }
   }, []);
 
+  useEffect(() => {
+    if (!engineRef.current) return;
+
+    engineRef.current.setCanvasClickHandler((x, y, e) => {
+      if (!isDotMode) return;
+      setPendingDotCoords(prevCords =>[...prevCords , {x ,y}]);
+      engineRef.current.drawDot(x, y, 5, "gray");
+    });
+  }, [isDotMode]);
+
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100vh",
-        background: "black",
-        position: "relative",
-      }}
-    >
+    <div className=" w-full h-screen bg-black relative">
       <canvas
         ref={canvasRef}
-        style={{
-          backgroundColor: "#111",
-          width: "100%",
-          height: "100%",
-          display: "block",
-          cursor: "grab",
-        }}
+        className={`bg-[#111] w-full h-full block  ${
+          isDotMode ? "cursor-crosshair" : "cursor-grab"
+        } `}
       />
     </div>
   );

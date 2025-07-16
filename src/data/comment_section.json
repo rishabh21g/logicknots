@@ -1,0 +1,267 @@
+{
+  "design_name": "Default",
+  "bugs": [
+    {
+      "id": "01255656ABC",
+      "number": 1,
+      "username": "ABC",
+      "date": "15-07-2025",
+      "time": "17:14",
+      "is_resolved": true,
+      "points": {
+        "x": 20,
+        "y": 20
+      },
+      "rectangle": [
+        {
+          "id": "ABVCFSRGRS",
+          "bbox": {
+            "xll": 0,
+            "yll": 0,
+            "xur": 10,
+            "yur": 10
+          }
+        },
+        {
+          "id": "PWEGDRHERH",
+          "bbox": {
+            "xll": 0,
+            "yll": 0,
+            "xur": 10,
+            "yur": 10
+          }
+        }
+      ],
+
+      "description": [
+        {
+          "username": "ABC",
+          "comment": "This is the 1st description",
+          "reply": [
+            {
+              "username": "ABC",
+              "reply": "Writing add on 1st description"
+            },
+            {
+              "username": "PQR",
+              "reply": "Replying to ABC"
+            }
+          ]
+        },
+        {
+          "username": "PQR",
+          "comment": "This is the 2st description",
+          "reply": [
+            {
+              "username": "PQR",
+              "reply": "This is the 2nd reply"
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "789456123DF",
+      "number": 2,
+      "username": "ABC",
+      "date": "15-07-2025",
+      "time": "17:14",
+      "is_resolved": false,
+      "points": {
+        "x": 20,
+        "y": 20
+      },
+      "rectangle": [],
+      "description": [
+        {
+          "username": "ABC",
+          "comment": "This is the 1st description",
+          "reply": [
+            {
+              "username": "ABC",
+              "reply": "Writing add on 1st description"
+            },
+            {
+              "username": "PQR",
+              "reply": "Replying to ABC"
+            }
+          ]
+        },
+        {
+          "username": "PQR",
+          "comment": "This is the 2st description",
+          "reply": [
+            {
+              "username": "PQR",
+              "reply": "This is the 2nd reply"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "improvements": [
+    {
+      "id": "01255656ABC",
+      "number": 1,
+      "username": "ABC",
+      "date": "15-07-2025",
+      "time": "17:14",
+      "is_resolved": false,
+      "points": {
+        "x": 20,
+        "y": 20
+      },
+      "rectangle": [],
+      "description": [
+        {
+          "username": "ABC",
+          "comment": "This is the 1st description",
+          "reply": [
+            {
+              "username": "ABC",
+              "reply": "Writing add on 1st description"
+            },
+            {
+              "username": "PQR",
+              "reply": "Replying to ABC"
+            }
+          ]
+        },
+        {
+          "username": "PQR",
+          "comment": "This is the 2st description",
+          "reply": [
+            {
+              "username": "PQR",
+              "reply": "This is the 2nd reply"
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "789456123DF",
+      "number": 2,
+      "username": "ABC",
+      "date": "15-07-2025",
+      "time": "17:14",
+      "is_resolved": false,
+      "points": {
+        "x": 20,
+        "y": 20
+      },
+      "rectangle": [],
+      "description": [
+        {
+          "username": "ABC",
+          "comment": "This is the 1st description",
+          "reply": [
+            {
+              "username": "ABC",
+              "reply": "Writing add on 1st description"
+            },
+            {
+              "username": "PQR",
+              "reply": "Replying to ABC"
+            }
+          ]
+        },
+        {
+          "username": "PQR",
+          "comment": "This is the 2st description",
+          "reply": [
+            {
+              "username": "PQR",
+              "reply": "This is the 2nd reply"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "query": [
+    {
+      "id": "01255656ABC",
+      "number": 1,
+      "username": "ABC",
+      "date": "15-07-2025",
+      "time": "17:14",
+      "is_resolved": false,
+      "points": {
+        "x": 20,
+        "y": 20
+      },
+      "rectangle": [],
+      "description": [
+        {
+          "username": "ABC",
+          "comment": "This is the 1st description",
+          "reply": [
+            {
+              "username": "ABC",
+              "reply": "Writing add on 1st description"
+            },
+            {
+              "username": "PQR",
+              "reply": "Replying to ABC"
+            }
+          ]
+        },
+        {
+          "username": "PQR",
+          "comment": "This is the 2st description",
+          "reply": [
+            {
+              "username": "PQR",
+              "reply": "This is the 2nd reply"
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "789456123DF",
+      "number": 2,
+      "username": "ABC",
+      "date": "15-07-2025",
+      "time": "17:14",
+      "is_resolved": false,
+      "points": {
+        "x": 20,
+        "y": 20
+      },
+      "rectangle": [],
+      "description": [
+        {
+          "username": "ABC",
+          "comment": "This is the 1st description",
+          "reply": [
+            {
+              "username": "ABC",
+              "reply": "Writing add on 1st description"
+            },
+            {
+              "username": "PQR",
+              "reply": "Replying to ABC"
+            }
+          ]
+        },
+        {
+          "username": "PQR",
+          "comment": "This is the 2st description",
+          "reply": [
+            {
+              "username": "PQR",
+              "reply": "This is the 2nd reply"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
