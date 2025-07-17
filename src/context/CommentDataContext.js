@@ -28,7 +28,7 @@ export const CommentDataProvider = ({ children }) => {
   });
   const username = "Logicknots";
 
-  //
+  //function to draw a dot
 
   const drawDotEventHandler = (x, y) => {
     if (!isDotMode) return;
@@ -57,6 +57,36 @@ export const CommentDataProvider = ({ children }) => {
     }));
   };
 
+  //function to save drawed rectangle
+  const addRectangleToComment = (rectBBox) => {
+    if (!rectangleMode) return;
+    if (selectedQuery == null) {
+      return alert("First add the bug ");
+    }
+    setCommentDetails((prev) => {
+      const updatedTab = prev[activeTab].map((comment) => {
+        if (comment.id === selectedQuery.id) {
+          return {
+            ...comment,
+            rectangle: [
+              ...comment.rectangle,
+              {
+                id: v4(),
+                bbox: rectBBox,
+              },
+            ],
+          };
+        }
+        return comment;
+      });
+
+      return {
+        ...prev,
+        [activeTab]: updatedTab,
+      };
+    });
+  };
+
   return (
     <CommentDataContext.Provider
       value={{
@@ -75,6 +105,7 @@ export const CommentDataProvider = ({ children }) => {
         drawDotEventHandler,
         selectedQuery,
         setSelectedQuery,
+        addRectangleToComment,
       }}
     >
       {children}

@@ -5,8 +5,14 @@ import { useCommentData } from "../context/CommentDataContext";
 const CanvasBoard = () => {
   const canvasRef = useRef(null);
   const engineRef = useRef(null);
-  const { isDotMode, setisDotMode, drawDotEventHandler, selectedQuery } =
-    useCommentData();
+  const {
+    isDotMode,
+    setisDotMode,
+    drawDotEventHandler,
+    selectedQuery,
+    rectangleMode,
+    addRectangleToComment,
+  } = useCommentData();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -36,13 +42,23 @@ const CanvasBoard = () => {
       engineRef.current.drawDot(x, (y = y * -1));
     }
   }, [selectedQuery]);
+  useEffect(() => {
+    if (!engineRef.current || !rectangleMode) return;
+    if (selectedQuery == null) {
+      return alert("First select the query ");
+    }
+
+    engineRef.current.setRectangleDrawHandler((bbox) => {
+      addRectangleToComment(bbox);
+    });
+  }, [rectangleMode]);
 
   return (
     <div className=" w-full h-screen bg-black relative">
       <canvas
         ref={canvasRef}
         className={`bg-[#111] w-full h-full block  ${
-          isDotMode ? "cursor-crosshair" : "cursor-grab"
+          isDotMode || rectangleMode ? "cursor-crosshair" : "cursor-grab"
         } `}
       />
     </div>

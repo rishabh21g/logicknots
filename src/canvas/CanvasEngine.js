@@ -61,31 +61,61 @@ export default class CanvasEngine {
 
     ctx.restore();
   }
+
   // function to draw a rectangle
-  drawRectangle(x, y, width = 100, height = 50, color = "yellow") {
+
+  drawRectangle(x1, y1, x2, y2) {
     const ctx = this.ctx;
-    ctx.save();
-    ctx.translate(this.offsetX, this.offsetY);
-    ctx.scale(this.scale, this.scale);
+    if (!ctx) return;
 
-    ctx.beginPath();
-    ctx.rect(x, y, width, height);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2 / this.scale;
-    ctx.stroke();
+    const width = x2 - x1;
+    const height = y2 - y1;
 
-    ctx.restore();
+    ctx.strokeStyle = "yellow"; 
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x1, y1, width, height);
   }
-  // function to clear canvas
-  clearCanvas() {
-  const width = this.canvas.width / this.dpr;
-  const height = this.canvas.height / this.dpr;
-  this.ctx.save();
-  this.ctx.clearRect(0, 0, width, height);
-  this.ctx.restore();
-  this.draw(); // redraw grid and axis
+
+  setRectangleDrawHandler(onComplete) {
+  let isDrawing = false;
+  let startX = 0, startY = 0;
+
+  this.canvas.onmousedown = (e) => {
+    const rect = this.canvas.getBoundingClientRect();
+    startX = e.clientX - rect.left;
+    startY = e.clientY - rect.top;
+    isDrawing = true;
+  };
+
+  this.canvas.onmouseup = (e) => {
+    if (!isDrawing) return;
+    isDrawing = false;
+
+    const rect = this.canvas.getBoundingClientRect();
+    const endX = e.clientX - rect.left;
+    const endY = e.clientY - rect.top;
+
+    this.drawRectangle(startX, startY, endX, endY);
+
+    const xll = Math.min(startX, endX);
+    const yll = Math.min(startY, endY);
+    const xur = Math.max(startX, endX);
+    const yur = Math.max(startY, endY);
+
+    onComplete({ xll, yll, xur, yur });
+  };
 }
 
+  // function to clear canvas
+
+  clearCanvas() {
+    const width = this.canvas.width / this.dpr;
+    const height = this.canvas.height / this.dpr;
+    this.ctx.save();
+    this.ctx.clearRect(0, 0, width, height);
+    this.ctx.restore();
+    this.draw(); // redraw grid and axis
+  }
 
   handleCanvasClick(e) {
     if (this.onCanvasClick) {
