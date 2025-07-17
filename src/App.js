@@ -17,10 +17,10 @@ function App() {
     <div className={`flex flex-col h-screen w-full relative `}>
       <CanvasBoard ref={canvasRef} />
       <div
-        className={`absolute bg-black rounded-md size-10 p-2  m-2 hover:bg-black/95 transition-all duration-200 `}
+        className={`absolute bg-neutral-800 size-10 flex justify-center items-center hover:bg-neutral-900 transition-all duration-200 h-full `}
         onClick={() => setOpenBox(!openBox)}
       >
-        <DialpadRounded className=" text-neutral-100  " />
+        <DialpadRounded className=" text-neutral-100 " />
       </div>
       {openBox && <ReportBugandImprovement />}
     </div>

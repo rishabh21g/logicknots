@@ -61,6 +61,31 @@ export default class CanvasEngine {
 
     ctx.restore();
   }
+  // function to draw a rectangle
+  drawRectangle(x, y, width = 100, height = 50, color = "yellow") {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.translate(this.offsetX, this.offsetY);
+    ctx.scale(this.scale, this.scale);
+
+    ctx.beginPath();
+    ctx.rect(x, y, width, height);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2 / this.scale;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+  // function to clear canvas
+  clearCanvas() {
+  const width = this.canvas.width / this.dpr;
+  const height = this.canvas.height / this.dpr;
+  this.ctx.save();
+  this.ctx.clearRect(0, 0, width, height);
+  this.ctx.restore();
+  this.draw(); // redraw grid and axis
+}
+
 
   handleCanvasClick(e) {
     if (this.onCanvasClick) {

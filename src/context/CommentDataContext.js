@@ -15,46 +15,41 @@ export const CommentDataProvider = ({ children }) => {
   //
   const [isDotMode, setisDotMode] = useState(false);
   //
-  const [pendingDotCoords, setPendingDotCoords] = useState([]);
-
   const [rectangleMode, setrectangleMode] = useState(false);
+  //
+  const [selectedQuery, setSelectedQuery] = useState(null);
 
   //
   const [commentDetails, setCommentDetails] = useState({
     design_name: "",
-    bug: [{}],
-    improvement: [{}],
-    query: [{}],
+    bug: [],
+    improvement: [],
+    query: [],
   });
   const username = "Logicknots";
 
   //
-  const drawDotEventHandler = (x, y, e) => {
+
+  const drawDotEventHandler = (x, y) => {
+    if (!isDotMode) return;
     window.canvasEngine.drawDot(x, y);
-    const newId = v4();
     const now = new Date();
     const date = now.toLocaleDateString("en-GB");
     const time = now.toLocaleTimeString("en-GB");
-
+    const newId = v4();
     const currentTabData = commentDetails[activeTab] || [];
-
     const newBug = {
       id: newId,
       number: currentTabData.length + 1,
-      username: username || "Anonymous",
+      username,
       date,
       time,
       is_resolved: false,
-      points: { x, y },
+      points: { x, y: y * -1 },
       rectangle: [],
-      description: [
-        {
-          username: username || "Anonymous",
-          comment: "",
-          reply: [],
-        },
-      ],
+      description: [],
     };
+    console.log(newBug);
 
     setCommentDetails((prev) => ({
       ...prev,
@@ -78,8 +73,8 @@ export const CommentDataProvider = ({ children }) => {
         editable,
         setEditable,
         drawDotEventHandler,
-        pendingDotCoords,
-        setPendingDotCoords,
+        selectedQuery,
+        setSelectedQuery,
       }}
     >
       {children}

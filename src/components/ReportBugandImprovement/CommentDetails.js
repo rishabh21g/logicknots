@@ -1,73 +1,95 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useCommentData } from "../../context/CommentDataContext";
-import { v4 } from "uuid";
+
+import { Reply } from "@mui/icons-material";
 
 const CommentDetails = () => {
   const [commentInput, setCommentInput] = useState("");
   const {
     commentDetails,
     setCommentDetails,
-    pendingDotCoords,
-    setPendingDotCoords,
     activeTab,
     username,
+    selectedQuery,
+    setSelectedQuery,
   } = useCommentData();
   const handleAddComment = () => {
-    if (!commentInput || !pendingDotCoords) return;
+    if (!commentInput.trim() || !selectedQuery) return;
 
-    const { x, y } = pendingDotCoords;
-    const newId = v4();
     const now = new Date();
     const date = now.toLocaleDateString("en-GB");
     const time = now.toLocaleTimeString("en-GB");
 
-    const currentTabData = commentDetails[activeTab] || [];
-
-    const newBug = {
-      id: newId,
-      number: currentTabData.length + 1,
-      username: username || "Anonymous",
+    const newComment = {
+      username,
+      text: commentInput.trim(),
       date,
       time,
-      is_resolved: false,
-      points: { x, y },
-      rectangle: [],
-      description: [
-        {
-          username: username || "Anonymous",
-          comment: commentInput,
-          reply: [],
-        },
-      ],
+      reply: [],
     };
 
-    setCommentDetails((prev) => ({
+    setCommentDetails((prev) => {
+      const updatedList = prev[activeTab].map((item) => {
+        if (item.id === selectedQuery.id) {
+          return {
+            ...item,
+            description: [...item.description, newComment],
+          };
+        }
+        return item;
+      });
+
+      return {
+        ...prev,
+        [activeTab]: updatedList,
+      };
+    });
+
+    setSelectedQuery((prev) => ({
       ...prev,
-      [activeTab]: [...prev[activeTab], newBug],
+      description: [...prev.description, newComment],
     }));
 
-    window.canvasEngine.drawDot(x, y, 5, "yellow");
-
     setCommentInput("");
-    setPendingDotCoords(null);
   };
+
+  useEffect(() => {
+    console.log(commentDetails);
+  });
   return (
-    <div className="w-full max-w-[26rem] mx-auto mt-6 p-5 border border-gray-300 rounded-md flex flex-col gap-4 h-[20rem] bg-neutral-950">
-      {/* Meta Info */}
-      <div className="flex flex-wrap gap-4 text-xs text-gray-400">
-        <span>
-          <strong>User:</strong> Username
-        </span>
-        <span>
-          <strong>Coordinates:</strong> 125x, 258y
-        </span>
-        <span>
-          <strong>Date:</strong> 12/07/2025
-        </span>
-        <span>
-          <strong>Time:</strong> 03:15 AM
-        </span>
-      </div>
+    <div className="w-full max-w-[26rem] mx-auto mt-6 p-5  rounded-md flex flex-col gap-4 h-auto bg-neutral-800">
+      {/* Comments Section */}
+      {selectedQuery?.description?.length === 0 ? (
+        <p className="text-gray-400">No comments yet.</p>
+      ) : (
+        selectedQuery?.description.map((comment, index) => (
+          <div
+            key={index}
+            className="bg-neutral-900 p-3 rounded shadow-md flex flex-col "
+          >
+            <div className="text-sm text-gray-100">{comment.text}</div>
+
+            <div className="flex justify-between items-center text-xs text-gray-400">
+              <div className="flex gap-x-1">
+                <span className="font-semibold text-blue-400">
+                  {comment.username}
+                </span>
+
+                <span>
+                  {comment.date} | {comment.time}
+                </span>
+              </div>
+
+              <button
+                className=" text-xs text-white bg-blue-700 rounded hover:bg-blue-800 transition shadow-lg"
+                // onClick={...} -> add reply functionality here
+              >
+                <Reply />
+              </button>
+            </div>
+          </div>
+        ))
+      )}
 
       {/* Input + Button */}
       <div className="flex gap-2">
@@ -77,19 +99,14 @@ const CommentDetails = () => {
           onChange={(e) => setCommentInput(e.target.value)}
           placeholder="Add a comment..."
           aria-label="Comment Input"
-          className="flex-1 px-3 py-1 text-sm text-gray-100 bg-black border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
+          className="flex-1 px-3 py-1 text-sm text-gray-100 bg-neutral-700 shadow-lg rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
         />
         <button
-          className="px-3 py-1 text-xs text-white bg-blue-700 rounded hover:bg-blue-800 transition"
+          className="px-3 py-1 text-xs text-white bg-blue-700 rounded hover:bg-blue-800 transition shadow-lg"
           onClick={handleAddComment}
         >
-          Add
+          <Reply />
         </button>
-      </div>
-
-      {/* Comments Section */}
-      <div className="flex-1 w-full overflow-y-auto border border-blue-300 rounded p-2 text-sm text-gray-200">
-        <p>No comments yet.</p>
       </div>
     </div>
   );
