@@ -3,7 +3,8 @@ import { useCommentData } from "../../context/CommentDataContext";
 const QueryCountDetailComponent = () => {
   const { commentDetails, activeTab, selectedQuery, setSelectedQuery } =
     useCommentData();
-  const currentTabData = commentDetails[activeTab] || [];
+    console.log(activeTab)
+  const currentTabData = commentDetails?.[activeTab] || [];
 
   return (
     <div className="w-full mx-auto flex flex-col gap-2 bg-neutral-900 overflow-y-auto max-w-[26rem] my-2 p-2 min-h-16 rounded-md px-4">

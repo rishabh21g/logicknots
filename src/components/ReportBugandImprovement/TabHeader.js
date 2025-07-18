@@ -2,11 +2,11 @@ import React from "react";
 import { useCommentData } from "../../context/CommentDataContext";
 
 const TabHeader = () => {
-  const { tabs, activeTab, setActiveTab } = useCommentData();
+  const { tabs, activeTab, setActiveTab, commentDetails } = useCommentData();
   return (
     <div className="flex mb-1 flex-col max-w-[22rem] mx-auto">
       <h1 className="text-blue-600 font-bold text-center text-2xl ">
-        Design name
+        {commentDetails?.design_name}
       </h1>
       <div className="flex  w-full justify-between mt-1">
         {tabs.map((tab) => {

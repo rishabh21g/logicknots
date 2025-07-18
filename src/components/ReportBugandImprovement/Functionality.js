@@ -62,9 +62,13 @@ const Functionality = () => {
   };
 
   return (
-    <div className="flex gap-6 items-center justify-center w-full my-2">
+    <div className="flex gap-6 items-center justify-center w-full my-2 ">
       <button
-        onClick={() => setisDotMode(!isDotMode)}
+        onClick={() => {
+          setisDotMode(!isDotMode)
+          window.canvasEngine.clearCanvas()
+          setrectangleMode(false)
+        }}
         className="hover:brightness-150"
       >
         <Add

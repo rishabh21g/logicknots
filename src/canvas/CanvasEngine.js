@@ -71,40 +71,48 @@ export default class CanvasEngine {
     const width = x2 - x1;
     const height = y2 - y1;
 
-    ctx.strokeStyle = "yellow"; 
+    ctx.strokeStyle = "yellow";
     ctx.lineWidth = 2;
     ctx.strokeRect(x1, y1, width, height);
   }
 
   setRectangleDrawHandler(onComplete) {
-  let isDrawing = false;
-  let startX = 0, startY = 0;
+    let isDrawing = false;
+    let startX = 0,
+      startY = 0;
 
-  this.canvas.onmousedown = (e) => {
-    const rect = this.canvas.getBoundingClientRect();
-    startX = e.clientX - rect.left;
-    startY = e.clientY - rect.top;
-    isDrawing = true;
-  };
+    this.canvas.onmousedown = (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      startX = e.clientX - rect.left;
+      startY = e.clientY - rect.top;
+      isDrawing = true;
+    };
 
-  this.canvas.onmouseup = (e) => {
-    if (!isDrawing) return;
-    isDrawing = false;
+    this.canvas.onmouseup = (e) => {
+      if (!isDrawing) return;
+      isDrawing = false;
 
-    const rect = this.canvas.getBoundingClientRect();
-    const endX = e.clientX - rect.left;
-    const endY = e.clientY - rect.top;
+      const rect = this.canvas.getBoundingClientRect();
+      const endX = e.clientX - rect.left;
+      const endY = e.clientY - rect.top;
 
-    this.drawRectangle(startX, startY, endX, endY);
+      const xll = Math.min(startX, endX);
+      const yll = Math.min(startY, endY);
+      const xur = Math.max(startX, endX);
+      const yur = Math.max(startY, endY);
 
-    const xll = Math.min(startX, endX);
-    const yll = Math.min(startY, endY);
-    const xur = Math.max(startX, endX);
-    const yur = Math.max(startY, endY);
+      const width = xur - xll;
+      const height = yur - yll;
 
-    onComplete({ xll, yll, xur, yur });
-  };
-}
+      if (width === 0 || height === 0) {
+        // console.warn("Ignored empty rectangle");
+        return;
+      }
+
+      this.drawRectangle(startX, startY, endX, endY);
+      onComplete({ xll, yll, xur, yur });
+    };
+  }
 
   // function to clear canvas
 

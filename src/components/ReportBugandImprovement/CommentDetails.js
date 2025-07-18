@@ -6,7 +6,6 @@ import { Reply } from "@mui/icons-material";
 const CommentDetails = () => {
   const [commentInput, setCommentInput] = useState("");
   const {
-    commentDetails,
     setCommentDetails,
     activeTab,
     username,
@@ -53,11 +52,8 @@ const CommentDetails = () => {
     setCommentInput("");
   };
 
-  useEffect(() => {
-    console.log(commentDetails);
-  });
   return (
-    <div className="w-full max-w-[26rem] mx-auto mt-6 p-5  rounded-md flex flex-col gap-4 h-auto bg-neutral-800">
+    <div className="w-full max-w-[26rem] mx-auto mt-6 p-5  rounded-md flex flex-col gap-4 h-auto bg-neutral-800 ">
       {/* Comments Section */}
       {selectedQuery?.description?.length === 0 ? (
         <p className="text-gray-400">No comments yet.</p>

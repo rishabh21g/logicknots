@@ -11,6 +11,7 @@ const CanvasBoard = () => {
     drawDotEventHandler,
     selectedQuery,
     rectangleMode,
+    setrectangleMode,
     addRectangleToComment,
   } = useCommentData();
 
@@ -31,24 +32,37 @@ const CanvasBoard = () => {
       drawDotEventHandler(x, y);
       setisDotMode(false);
     });
-  }, [isDotMode]);
+  }, [isDotMode, drawDotEventHandler, setisDotMode]);
 
+  //only show the selected query dots and rectangles
   useEffect(() => {
     if (!engineRef.current) return;
 
     engineRef.current.clearCanvas();
+
+    // Draw the main dot (if exists)
     if (selectedQuery?.points) {
-      let { x, y } = selectedQuery.points;
-      engineRef.current.drawDot(x, (y = y * -1));
-    }
-  }, [selectedQuery]);
-  useEffect(() => {
-    if (!engineRef.current || !rectangleMode) return;
-    if (selectedQuery == null) {
-      return alert("First select the query ");
+      const { x, y } = selectedQuery.points;
+      engineRef.current.drawDot(x, -y);
     }
 
+    // Draw all rectangles (if any)
+    if (selectedQuery?.rectangle?.length) {
+      selectedQuery.rectangle.forEach(({ bbox }) => {
+        const { xll, yll, xur, yur } = bbox;
+        engineRef.current.drawRectangle(xll, yll, xur, yur);
+      });
+    }
+  }, [selectedQuery]);
+
+  //draw rectangle
+  useEffect(() => {
+    if (!engineRef.current) return;
+
+    if (selectedQuery == null) return;
+
     engineRef.current.setRectangleDrawHandler((bbox) => {
+      if (!rectangleMode) return;
       addRectangleToComment(bbox);
     });
   }, [rectangleMode]);

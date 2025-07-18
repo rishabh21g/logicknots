@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { v4 } from "uuid";
 
 const CommentDataContext = createContext();
@@ -21,13 +21,15 @@ export const CommentDataProvider = ({ children }) => {
 
   //
   const [commentDetails, setCommentDetails] = useState({
-    design_name: "",
+    design_name: null || "Logicknots",
     bug: [],
     improvement: [],
     query: [],
   });
   const username = "Logicknots";
-
+  useEffect(() => {
+    console.log(commentDetails);
+  }, [commentDetails]);
   //function to draw a dot
 
   const drawDotEventHandler = (x, y) => {
@@ -49,12 +51,15 @@ export const CommentDataProvider = ({ children }) => {
       rectangle: [],
       description: [],
     };
-    console.log(newBug);
 
-    setCommentDetails((prev) => ({
-      ...prev,
-      [activeTab]: [...prev[activeTab], newBug],
-    }));
+    setCommentDetails((prev) => {
+      const updatedTab = [...prev[activeTab], newBug];
+      setSelectedQuery(updatedTab.at(-1)); 
+      return {
+        ...prev,
+        [activeTab]: updatedTab,
+      };
+    });
   };
 
   //function to save drawed rectangle
@@ -63,10 +68,11 @@ export const CommentDataProvider = ({ children }) => {
     if (selectedQuery == null) {
       return alert("First add the bug ");
     }
+ console.log(rectBBox)
     setCommentDetails((prev) => {
       const updatedTab = prev[activeTab].map((comment) => {
         if (comment.id === selectedQuery.id) {
-          return {
+          const updatedComment = {
             ...comment,
             rectangle: [
               ...comment.rectangle,
@@ -76,6 +82,11 @@ export const CommentDataProvider = ({ children }) => {
               },
             ],
           };
+
+          //Update selectedQuery to new modified version
+          setSelectedQuery(updatedComment);
+
+          return updatedComment;
         }
         return comment;
       });
@@ -85,6 +96,7 @@ export const CommentDataProvider = ({ children }) => {
         [activeTab]: updatedTab,
       };
     });
+    
   };
 
   return (
