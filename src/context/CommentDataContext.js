@@ -18,6 +18,7 @@ export const CommentDataProvider = ({ children }) => {
   const [rectangleMode, setrectangleMode] = useState(false);
   //
   const [selectedQuery, setSelectedQuery] = useState(null);
+  
 
   //
   const [commentDetails, setCommentDetails] = useState({
@@ -32,9 +33,11 @@ export const CommentDataProvider = ({ children }) => {
   }, [commentDetails]);
   //function to draw a dot
 
-  const drawDotEventHandler = (x, y) => {
+  const drawDotEventHandler = (x, y , switchColor) => {
     if (!isDotMode) return;
-    window.canvasEngine.drawDot(x, y);
+
+    // console.log(color);
+    window.canvasEngine.drawDot(x, y, 4, switchColor);
     const now = new Date();
     const date = now.toLocaleDateString("en-GB");
     const time = now.toLocaleTimeString("en-GB");
@@ -54,7 +57,7 @@ export const CommentDataProvider = ({ children }) => {
 
     setCommentDetails((prev) => {
       const updatedTab = [...prev[activeTab], newBug];
-      setSelectedQuery(updatedTab.at(-1)); 
+      setSelectedQuery(updatedTab.at(-1));
       return {
         ...prev,
         [activeTab]: updatedTab,
@@ -68,7 +71,7 @@ export const CommentDataProvider = ({ children }) => {
     if (selectedQuery == null) {
       return alert("First add the bug ");
     }
- console.log(rectBBox)
+    console.log(rectBBox);
     setCommentDetails((prev) => {
       const updatedTab = prev[activeTab].map((comment) => {
         if (comment.id === selectedQuery.id) {
@@ -96,7 +99,6 @@ export const CommentDataProvider = ({ children }) => {
         [activeTab]: updatedTab,
       };
     });
-    
   };
 
   return (

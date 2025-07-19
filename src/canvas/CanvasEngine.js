@@ -48,8 +48,9 @@ export default class CanvasEngine {
   }
 
   //add dot for bug improvement and query
-  drawDot(x, y, radius = 5, color = "yellow") {
+  drawDot(x, y, radius, color) {
     const ctx = this.ctx;
+
     ctx.save();
     ctx.translate(this.offsetX, this.offsetY);
     ctx.scale(this.scale, this.scale);
@@ -60,18 +61,19 @@ export default class CanvasEngine {
     ctx.fill();
 
     ctx.restore();
+    console.log(color);
   }
 
   // function to draw a rectangle
 
-  drawRectangle(x1, y1, x2, y2) {
+  drawRectangle(x1, y1, x2, y2 , color) {
     const ctx = this.ctx;
     if (!ctx) return;
 
     const width = x2 - x1;
     const height = y2 - y1;
 
-    ctx.strokeStyle = "yellow";
+    ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.strokeRect(x1, y1, width, height);
   }

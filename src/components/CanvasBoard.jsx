@@ -12,8 +12,20 @@ const CanvasBoard = () => {
     selectedQuery,
     rectangleMode,
     setrectangleMode,
+    activeTab,
     addRectangleToComment,
   } = useCommentData();
+
+  // change the color on the basis of active tab
+  let color = "";
+  console.log(activeTab);
+  if (activeTab === "bug") {
+    color = "red";
+  } else if (activeTab === "improvement") {
+    color = "blue";
+  } else if (activeTab === "query") {
+    color = "green";
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -29,10 +41,10 @@ const CanvasBoard = () => {
     engineRef.current.setCanvasClickHandler((x, y, e) => {
       if (!isDotMode) return;
 
-      drawDotEventHandler(x, y);
+      drawDotEventHandler(x, y, color);
       setisDotMode(false);
     });
-  }, [isDotMode, drawDotEventHandler, setisDotMode]);
+  }, [isDotMode ,activeTab]);
 
   //only show the selected query dots and rectangles
   useEffect(() => {
@@ -50,7 +62,7 @@ const CanvasBoard = () => {
     if (selectedQuery?.rectangle?.length) {
       selectedQuery.rectangle.forEach(({ bbox }) => {
         const { xll, yll, xur, yur } = bbox;
-        engineRef.current.drawRectangle(xll, yll, xur, yur);
+        engineRef.current.drawRectangle(xll, yll, xur, yur, color);
       });
     }
   }, [selectedQuery]);
