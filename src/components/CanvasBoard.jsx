@@ -11,9 +11,12 @@ const CanvasBoard = () => {
     drawDotEventHandler,
     selectedQuery,
     rectangleMode,
-    setrectangleMode,
+    setseeAllDots,
+    setSelectedQuery,
+    seeAllDots,
     activeTab,
     addRectangleToComment,
+    commentDetails,
   } = useCommentData();
 
   // change the color on the basis of active tab
@@ -55,7 +58,7 @@ const CanvasBoard = () => {
     // Draw the main dot (if exists)
     if (selectedQuery?.points) {
       const { x, y } = selectedQuery.points;
-      engineRef.current.drawDot(x, -y);
+      engineRef.current.drawDot(x, -y, 4, color);
     }
 
     // Draw all rectangles (if any)
@@ -73,11 +76,34 @@ const CanvasBoard = () => {
 
     if (selectedQuery == null) return;
 
-    engineRef.current.setRectangleDrawHandler((bbox) => {
+    engineRef.current.setRectangleDrawHandler((bbox ) => {
       if (!rectangleMode) return;
       addRectangleToComment(bbox);
     });
   }, [rectangleMode]);
+
+  // to see all dots on toggle
+  useEffect(() => {
+    if (!engineRef.current) return;
+    const engine = engineRef.current;
+    if (seeAllDots) {
+      setSelectedQuery(null)
+      engine.clearCanvas();
+
+      const queries = commentDetails[activeTab] || [];
+
+      queries.forEach((query) => {
+        // draw dot
+        if (query.points) {
+          const { x, y } = query.points;
+          engine.drawDot(x, -y, 4, color);
+        }
+      });
+    } else {
+      
+      engine.clearCanvas();
+    }
+  }, [seeAllDots, activeTab]);
 
   return (
     <div className=" w-full h-screen bg-black relative">

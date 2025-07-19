@@ -48,7 +48,7 @@ export default class CanvasEngine {
   }
 
   //add dot for bug improvement and query
-  drawDot(x, y, radius, color) {
+  drawDot(x, y, radius, color= "red") {
     const ctx = this.ctx;
     if (!ctx) return;
 
@@ -58,11 +58,11 @@ export default class CanvasEngine {
 
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, 2 * Math.PI);
-    ctx.fillStyle ="red";
+    ctx.fillStyle = color;
     ctx.fill();
 
     ctx.restore();
-    console.log(color);
+    // console.log(color);
   }
 
   // function to draw a rectangle

@@ -18,8 +18,8 @@ export const CommentDataProvider = ({ children }) => {
   const [rectangleMode, setrectangleMode] = useState(false);
   //
   const [selectedQuery, setSelectedQuery] = useState(null);
-  
-
+  //
+  const [seeAllDots, setseeAllDots] = useState(false);
   //
   const [commentDetails, setCommentDetails] = useState({
     design_name: null || "Logicknots",
@@ -33,8 +33,8 @@ export const CommentDataProvider = ({ children }) => {
   }, [commentDetails]);
   //function to draw a dot
 
-  const drawDotEventHandler = (x, y ) => {
-    if (!isDotMode) return
+  const drawDotEventHandler = (x, y) => {
+    if (!isDotMode) return;
     const now = new Date();
     const date = now.toLocaleDateString("en-GB");
     const time = now.toLocaleTimeString("en-GB");
@@ -117,6 +117,8 @@ export const CommentDataProvider = ({ children }) => {
         selectedQuery,
         setSelectedQuery,
         addRectangleToComment,
+        seeAllDots,
+        setseeAllDots,
       }}
     >
       {children}
