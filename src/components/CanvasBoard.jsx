@@ -18,7 +18,6 @@ const CanvasBoard = () => {
 
   // change the color on the basis of active tab
   let color = "";
-  console.log(activeTab);
   if (activeTab === "bug") {
     color = "red";
   } else if (activeTab === "improvement") {
@@ -41,10 +40,11 @@ const CanvasBoard = () => {
     engineRef.current.setCanvasClickHandler((x, y, e) => {
       if (!isDotMode) return;
 
-      drawDotEventHandler(x, y, color);
+      drawDotEventHandler(x, y);
+      engineRef.current.drawDot(x, y, 4, color);
       setisDotMode(false);
     });
-  }, [isDotMode ,activeTab]);
+  }, [isDotMode, activeTab]);
 
   //only show the selected query dots and rectangles
   useEffect(() => {

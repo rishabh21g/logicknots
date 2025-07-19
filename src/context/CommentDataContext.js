@@ -33,11 +33,8 @@ export const CommentDataProvider = ({ children }) => {
   }, [commentDetails]);
   //function to draw a dot
 
-  const drawDotEventHandler = (x, y , color) => {
-    if (!isDotMode) return;
-
-    // console.log(color);
-    window.canvasEngine.drawDot(x, y, 4, color);
+  const drawDotEventHandler = (x, y ) => {
+    if (!isDotMode) return
     const now = new Date();
     const date = now.toLocaleDateString("en-GB");
     const time = now.toLocaleTimeString("en-GB");

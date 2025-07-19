@@ -50,6 +50,7 @@ export default class CanvasEngine {
   //add dot for bug improvement and query
   drawDot(x, y, radius, color) {
     const ctx = this.ctx;
+    if (!ctx) return;
 
     ctx.save();
     ctx.translate(this.offsetX, this.offsetY);
@@ -57,7 +58,7 @@ export default class CanvasEngine {
 
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, 2 * Math.PI);
-    ctx.fillStyle = color;
+    ctx.fillStyle ="red";
     ctx.fill();
 
     ctx.restore();
@@ -66,13 +67,13 @@ export default class CanvasEngine {
 
   // function to draw a rectangle
 
-  drawRectangle(x1, y1, x2, y2 , color) {
+  drawRectangle(x1, y1, x2, y2, color) {
     const ctx = this.ctx;
     if (!ctx) return;
 
     const width = x2 - x1;
     const height = y2 - y1;
-   console.log(color)
+    console.log(color);
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.strokeRect(x1, y1, width, height);
