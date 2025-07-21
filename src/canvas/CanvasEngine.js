@@ -27,7 +27,10 @@ export default class CanvasEngine {
     this.startPan = { x: 0, y: 0 };
     this.setupCanvas();
 
+    this.isDrawing = false;
     this.dashOffset = 0; // animation ke liye offset
+    this.startX = 0;
+    this.startY = 0;
 
     this.bindEvents();
   }
@@ -46,6 +49,51 @@ export default class CanvasEngine {
   bindEvents() {
     this.canvas.addEventListener("wheel", this.handleZoom.bind(this));
     this.canvas.addEventListener("click", this.handleCanvasClick.bind(this));
+    this.canvas.addEventListener("mousedown", this.customStartDrag.bind(this));
+    this.canvas.addEventListener(
+      "mousemove",
+      this.customPerformDrag.bind(this)
+    );
+    this.canvas.addEventListener("mouseup", this.customStopDrag.bind(this));
+  }
+  customStartDrag(e) {
+    if (this.onCanvasRectangleClick) {
+      const rect = this.canvas.getBoundingClientRect();
+      this.startX = e.clientX - rect.left;
+      this.startY = e.clientY - rect.top;
+      this.isDrawing = true;
+    }
+  }
+  customPerformDrag(e) {
+    if (this.onCanvasRectangleClick) {
+    }
+  }
+  customStopDrag(e) {
+    let isDrawing = this.isDrawing;
+    if (this.onCanvasRectangleClick) {
+      if (!isDrawing) return;
+      isDrawing = false;
+
+      const rect = this.canvas.getBoundingClientRect();
+      const endX = e.clientX - rect.left;
+      const endY = e.clientY - rect.top;
+
+      const xll = Math.min(this.startX, endX);
+      const yll = Math.min(this.startY, endY);
+      const xur = Math.max(this.startX, endX);
+      const yur = Math.max(this.startY, endY);
+
+      const width = xur - xll;
+      const height = yur - yll;
+
+      if (width === 0 || height === 0) {
+        // console.warn("Ignored empty rectangle");
+        return;
+      }
+
+      this.drawRectangle(this.startX, this.startY, endX, endY);
+      // bbox({ xll, yll, xur, yur });
+    }
   }
 
   //add dot for bug improvement and query
@@ -74,49 +122,12 @@ export default class CanvasEngine {
     if (!ctx) return;
     const width = x2 - x1;
     const height = y2 - y1;
-    console.log(color);
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.strokeRect(x1, y1, width, height);
   }
 
-  setRectangleDrawHandler(onComplete) {
-    let isDrawing = false;
-    let startX = 0,
-      startY = 0;
-
-    this.canvas.onmousedown = (e) => {
-      const rect = this.canvas.getBoundingClientRect();
-      startX = e.clientX - rect.left;
-      startY = e.clientY - rect.top;
-      isDrawing = true;
-    };
-
-    this.canvas.onmouseup = (e) => {
-      if (!isDrawing) return;
-      isDrawing = false;
-
-      const rect = this.canvas.getBoundingClientRect();
-      const endX = e.clientX - rect.left;
-      const endY = e.clientY - rect.top;
-
-      const xll = Math.min(startX, endX);
-      const yll = Math.min(startY, endY);
-      const xur = Math.max(startX, endX);
-      const yur = Math.max(startY, endY);
-
-      const width = xur - xll;
-      const height = yur - yll;
-
-      if (width === 0 || height === 0) {
-        // console.warn("Ignored empty rectangle");
-        return;
-      }
-
-      this.drawRectangle(startX, startY, endX, endY);
-      onComplete({ xll, yll, xur, yur });
-    };
-  }
+  setRectangleDrawHandler(bbox) {}
 
   // function to clear canvas
 
@@ -145,6 +156,52 @@ export default class CanvasEngine {
 
   setCanvasClickHandler(handler) {
     this.onCanvasClick = handler;
+  }
+
+  // handleCanvasRectangleClick(bbox) {
+  //   if (this.onCanvasRectangleClick) {
+  //     console.log("object");
+  //     let isDrawing = false;
+  //     let startX = 0,
+  //       startY = 0;
+
+  //     this.canvas.onmousedown = (e) => {
+  //       const rect = this.canvas.getBoundingClientRect();
+  //       startX = e.clientX - rect.left;
+  //       startY = e.clientY - rect.top;
+  //       isDrawing = true;
+  //     };
+
+  //     this.canvas.onmouseup = (e) => {
+  //       if (!isDrawing) return;
+  //       isDrawing = false;
+
+  //       const rect = this.canvas.getBoundingClientRect();
+  //       const endX = e.clientX - rect.left;
+  //       const endY = e.clientY - rect.top;
+
+  //       const xll = Math.min(startX, endX);
+  //       const yll = Math.min(startY, endY);
+  //       const xur = Math.max(startX, endX);
+  //       const yur = Math.max(startY, endY);
+
+  //       const width = xur - xll;
+  //       const height = yur - yll;
+
+  //       if (width === 0 || height === 0) {
+  //         // console.warn("Ignored empty rectangle");
+  //         return;
+  //       }
+
+  //       this.drawRectangle(startX, startY, endX, endY);
+  //       bbox({ xll, yll, xur, yur });
+  //     };
+  //   }
+  // }
+
+  setCanvasRectangleClickHandler(handler) {
+    console.log("setCanvasRectangleClickHandler with value", handler);
+    this.onCanvasRectangleClick = handler;
   }
 
   // handle dots for zoom with react state
@@ -213,7 +270,7 @@ export default class CanvasEngine {
   }
 
   startDrag(e) {
-    this.recordState();
+    // this.recordState();
     if (!this.selectedObjects?.length) return;
 
     const x = (e.offsetX - this.offsetX) / this.scale;
