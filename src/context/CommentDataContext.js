@@ -28,9 +28,7 @@ export const CommentDataProvider = ({ children }) => {
     query: [],
   });
   const username = "Logicknots";
-  useEffect(() => {
-    console.log(commentDetails);
-  }, [commentDetails]);
+  console.log(commentDetails);
   //function to draw a dot
 
   const drawDotEventHandler = (x, y) => {
@@ -64,7 +62,8 @@ export const CommentDataProvider = ({ children }) => {
 
   //function to save drawed rectangle
   const addRectangleToComment = (rectBBox) => {
-    if (!rectangleMode) return;
+    console.log(rectangleMode);
+    if (!rectangleMode) return ;
     if (selectedQuery == null) {
       return alert("First add the bug ");
     }

@@ -65,9 +65,9 @@ const Functionality = () => {
     <div className="flex gap-6 items-center justify-center w-full my-2 ">
       <button
         onClick={() => {
-          setisDotMode(!isDotMode)
-          window.canvasEngine.clearCanvas()
-          setrectangleMode(false)
+          setisDotMode(!isDotMode);
+          window.canvasEngine.clearCanvas();
+          // setrectangleMode(false);
         }}
         className="hover:brightness-150"
       >
@@ -88,7 +88,7 @@ const Functionality = () => {
       </button>
       <button
         className="hover:brightness-150"
-        onClick={() => setrectangleMode(!rectangleMode)}
+        onClick={() => setrectangleMode((prev) => !prev)}
       >
         <Rectangle
           className={` size-8 ${

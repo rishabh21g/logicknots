@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useCommentData } from "../../context/CommentDataContext";
 
-import { Reply } from "@mui/icons-material";
+import { DateRange, Person, Reply, Timer } from "@mui/icons-material";
 
 const CommentDetails = () => {
   const [commentInput, setCommentInput] = useState("");
@@ -24,7 +24,6 @@ const CommentDetails = () => {
       text: commentInput.trim(),
       date,
       time,
-      reply: [],
     };
 
     setCommentDetails((prev) => {
@@ -61,27 +60,24 @@ const CommentDetails = () => {
         selectedQuery?.description.map((comment, index) => (
           <div
             key={index}
-            className="bg-neutral-900 p-3 rounded shadow-md flex flex-col "
+            className="bg-neutral-900 p-4 gap-y-1 rounded shadow-md flex flex-col "
           >
-            <div className="text-sm text-gray-100">{comment.text}</div>
+            <div className=" text-gray-100 font-semibold text-lg">{comment.text}</div>
 
             <div className="flex justify-between items-center text-xs text-gray-400">
-              <div className="flex gap-x-1">
-                <span className="font-semibold text-blue-400">
+              <div className="flex gap-2">
+                <span className="font-semibold flex items-center">
+                  <Person fontSize="small" className="text-blue-500" />{" "}
                   {comment.username}
                 </span>
 
-                <span>
-                  {comment.date} | {comment.time}
+                <span className="flex gap-x-1 items-center">
+                  <DateRange fontSize="small" className="text-blue-500" />
+                  {comment.date}{" "}
+                  <Timer fontSize="small" className="text-blue-500" />
+                  {comment.time}
                 </span>
               </div>
-
-              <button
-                className=" text-xs text-white bg-blue-700 rounded hover:bg-blue-800 transition shadow-lg"
-                // onClick={...} -> add reply functionality here
-              >
-                <Reply />
-              </button>
             </div>
           </div>
         ))

@@ -11,7 +11,6 @@ const CanvasBoard = () => {
     drawDotEventHandler,
     selectedQuery,
     rectangleMode,
-    setseeAllDots,
     setSelectedQuery,
     seeAllDots,
     activeTab,
@@ -29,6 +28,7 @@ const CanvasBoard = () => {
     color = "green";
   }
 
+  // Draw a canavs first
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas && !engineRef.current) {
@@ -37,6 +37,7 @@ const CanvasBoard = () => {
     }
   }, []);
 
+  // for dot
   useEffect(() => {
     if (!engineRef.current) return;
 
@@ -65,6 +66,7 @@ const CanvasBoard = () => {
     if (selectedQuery?.rectangle?.length) {
       selectedQuery.rectangle.forEach(({ bbox }) => {
         const { xll, yll, xur, yur } = bbox;
+        console.log("Code is running");
         engineRef.current.drawRectangle(xll, yll, xur, yur, color);
       });
     }
@@ -72,13 +74,25 @@ const CanvasBoard = () => {
 
   //draw rectangle
   useEffect(() => {
-    if (!engineRef.current) return;
+    console.log(rectangleMode, "Rectangle mode toggle");
+    if (!engineRef.current) {
+      return;
+    }
+    if (!rectangleMode) {
+      engineRef.current.setRectangleDrawHandler((bbox) => {
+        addRectangleToComment(bbox);
 
-    if (selectedQuery == null) return;
-
-    engineRef.current.setRectangleDrawHandler((bbox ) => {
-      if (!rectangleMode) return;
+        console.log("second");
+      });
+    }
+    if (selectedQuery == null) {
+      return;
+    }
+    console.log("first");
+    engineRef.current.setRectangleDrawHandler((bbox) => {
       addRectangleToComment(bbox);
+
+      console.log("second");
     });
   }, [rectangleMode]);
 
@@ -87,7 +101,7 @@ const CanvasBoard = () => {
     if (!engineRef.current) return;
     const engine = engineRef.current;
     if (seeAllDots) {
-      setSelectedQuery(null)
+      setSelectedQuery(null);
       engine.clearCanvas();
 
       const queries = commentDetails[activeTab] || [];
@@ -100,10 +114,42 @@ const CanvasBoard = () => {
         }
       });
     } else {
-      
       engine.clearCanvas();
     }
   }, [seeAllDots, activeTab]);
+
+  //handle zoom redraw dots
+  useEffect(() => {
+    if (!engineRef.current) return;
+    const engine = engineRef.current;
+
+    const dots = [];
+
+    if (seeAllDots) {
+      const queries = commentDetails[activeTab] || [];
+      for (let query of queries) {
+        if (query.points) {
+          dots.push({
+            x: query.points.x,
+            y: -query.points.y,
+            radius: 4,
+            color,
+          });
+
+          engine.setExternalDots(dots);
+        }
+      }
+    } else if (selectedQuery?.points) {
+      dots.push({
+        x: selectedQuery.points.x,
+        y: -selectedQuery.points.y,
+        radius: 4,
+        color,
+      });
+
+      engine.setExternalDots(dots);
+    }
+  }, [seeAllDots, selectedQuery, activeTab]);
 
   return (
     <div className=" w-full h-screen bg-black relative">

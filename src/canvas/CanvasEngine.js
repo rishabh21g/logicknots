@@ -8,7 +8,8 @@ export default class CanvasEngine {
     this.ctx = canvas.getContext("2d");
     this.dpr = window.devicePixelRatio || 1;
     this.showGrid = true;
-
+    this.dots = []; // { x, y, radius, color }
+    this.rectangles = []; // { x1, y1, x2, y2, color }
     this.offsetX = 0;
     this.offsetY = 0;
     this.scale = 1;
@@ -17,6 +18,7 @@ export default class CanvasEngine {
     this.dragOffset = { x: 0, y: 0 };
     this.dragTarget = null;
     this.onCanvasClick = null; // Callback for canvas clicks
+    this.onCanvasRectangleClick = null;
     this.gridSpacing = 20; // ✅ Default spacing
     window.canvasEngine = this; // 👈 expose globally
 
@@ -28,7 +30,6 @@ export default class CanvasEngine {
     this.dashOffset = 0; // animation ke liye offset
 
     this.bindEvents();
-    this.draw();
   }
 
   setupCanvas() {
@@ -48,10 +49,13 @@ export default class CanvasEngine {
   }
 
   //add dot for bug improvement and query
-  drawDot(x, y, radius, color= "red") {
+  drawDot(x, y, radius, color = "red") {
     const ctx = this.ctx;
     if (!ctx) return;
-
+    // to push co ordinates on dots arr for further use
+    // if (store) {
+    //   this.dots.push({ x, y, radius, color });
+    // }
     ctx.save();
     ctx.translate(this.offsetX, this.offsetY);
     ctx.scale(this.scale, this.scale);
@@ -60,17 +64,14 @@ export default class CanvasEngine {
     ctx.arc(x, y, radius, 0, 2 * Math.PI);
     ctx.fillStyle = color;
     ctx.fill();
-
     ctx.restore();
-    // console.log(color);
   }
 
   // function to draw a rectangle
 
-  drawRectangle(x1, y1, x2, y2, color) {
+  drawRectangle(x1, y1, x2, y2, color = "red") {
     const ctx = this.ctx;
     if (!ctx) return;
-
     const width = x2 - x1;
     const height = y2 - y1;
     console.log(color);
@@ -146,6 +147,14 @@ export default class CanvasEngine {
     this.onCanvasClick = handler;
   }
 
+  // handle dots for zoom with react state
+
+  setExternalDots(dotsArray = []) {
+    this.externalDots = dotsArray;
+    this.draw(); // force redraw including dots
+  }
+
+  // handle zoom
   handleZoom(e) {
     e.preventDefault();
     const zoomFactor = 1.1;
@@ -161,6 +170,7 @@ export default class CanvasEngine {
     this.offsetY = mouseY - worldY * newScale;
     this.scale = newScale;
     this.draw();
+    this.drawDot();
   }
 
   drawGrid() {
@@ -376,5 +386,9 @@ export default class CanvasEngine {
     ctx.strokeStyle = "#ff0000";
     ctx.stroke();
     ctx.restore();
+    const dots = this.externalDots || [];
+    for (let { x, y, radius, color } of dots) {
+      this.drawDot(x, y, radius || 4, color || "red");
+    }
   }
 }
