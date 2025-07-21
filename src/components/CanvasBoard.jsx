@@ -41,9 +41,11 @@ const CanvasBoard = () => {
   useEffect(() => {
     if (!engineRef.current) return;
 
-    engineRef.current.setCanvasClickHandler((x, y, e) => {
-      if (!isDotMode) return;
+    if (!isDotMode) {
+      return engineRef.current.setCanvasClickHandler(null);
+    }
 
+    engineRef.current.setCanvasClickHandler((x, y, e) => {
       drawDotEventHandler(x, y);
       engineRef.current.drawDot(x, y, 4, color);
       setisDotMode(false);
@@ -74,25 +76,23 @@ const CanvasBoard = () => {
 
   //draw rectangle
   useEffect(() => {
-    console.log(rectangleMode, "Rectangle mode toggle");
+    console.log("Rectangle mode toggle", rectangleMode);
     if (!engineRef.current) {
+      console.log("Rectangle", rectangleMode);
+
       return;
     }
     if (!rectangleMode) {
-      engineRef.current.setRectangleDrawHandler((bbox) => {
-        addRectangleToComment(bbox);
-
-        console.log("second");
-      });
+      console.log("mode", rectangleMode);
+      return engineRef.current.setCanvasRectangleClickHandler(null);
     }
     if (selectedQuery == null) {
+      console.log("asdsad", rectangleMode);
       return;
     }
-    console.log("first");
-    engineRef.current.setRectangleDrawHandler((bbox) => {
+    engineRef.current.setCanvasRectangleClickHandler((bbox) => {
       addRectangleToComment(bbox);
-
-      console.log("second");
+      // setRectangleDrawHandler
     });
   }, [rectangleMode]);
 
