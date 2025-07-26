@@ -1,5 +1,7 @@
 import { Add, Delete, Edit, Rectangle } from "@mui/icons-material";
 import { useCommentData } from "../../context/CommentDataContext";
+import Download from "./Download";
+import Upload from "./Upload";
 
 const Functionality = () => {
   const {
@@ -38,6 +40,7 @@ const Functionality = () => {
 
     setSelectedQuery(null);
   };
+
   //Function to toggle the resolved or not selected query
 
   const markAsResolved = () => {
@@ -67,7 +70,7 @@ const Functionality = () => {
         onClick={() => {
           setisDotMode(!isDotMode);
           window.canvasEngine.clearCanvas();
-          // setrectangleMode(false);
+          setrectangleMode(false);
         }}
         className="hover:brightness-150"
       >
@@ -77,7 +80,11 @@ const Functionality = () => {
       </button>
       <button
         className="hover:brightness-150"
-        onClick={() => setEditable(!editable)}
+        onClick={() => {
+          setEditable((prev) => !prev);
+          setrectangleMode(false);
+          setisDotMode(false);
+        }}
       >
         <Edit
           className={` size-8 ${editable ? "text-blue-500" : "text-gray-300"}`}
@@ -97,13 +104,30 @@ const Functionality = () => {
         />
       </button>
       <button className="hover:brightness-150 justify-center flex">
-        <input
-          type="checkbox"
-          checked={selectedQuery?.is_resolved || false}
-          className="w-[1.3rem] h-[1.3rem] accent-blue-600"
-          onChange={markAsResolved}
-        />
+        <label className="relative w-6 h-6">
+          <input
+            type="checkbox"
+            checked={selectedQuery?.is_resolved || false}
+            onChange={markAsResolved}
+            className="peer appearance-none w-full h-full rounded-full border-2 border-blue-500 cursor-pointer checked:bg-blue-500"
+          />
+          <svg
+            className="pointer-events-none absolute left-1 top-1 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </label>
       </button>
+      <Download/>
+      <Upload/>
     </div>
   );
 };

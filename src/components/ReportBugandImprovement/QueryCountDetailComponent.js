@@ -2,7 +2,7 @@ import React from "react";
 import { useCommentData } from "../../context/CommentDataContext";
 
 const QueryCountDetailComponent = () => {
-  const { commentDetails, activeTab, selectedQuery, setSelectedQuery } =
+  const { commentDetails, activeTab, selectedQuery, setSelectedQuery ,setrectangleMode } =
     useCommentData();
   const currentTabData = commentDetails?.[activeTab] || [];
 
@@ -23,6 +23,8 @@ const QueryCountDetailComponent = () => {
               onClick={() => {
                 window.canvasEngine.clearCanvas();
                 setSelectedQuery(item);
+                setrectangleMode(false)
+                
               }}
               className={`text-xs text-white
                  ${

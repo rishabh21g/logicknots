@@ -8,8 +8,6 @@ export default class CanvasEngine {
     this.ctx = canvas.getContext("2d");
     this.dpr = window.devicePixelRatio || 1;
     this.showGrid = true;
-    this.dots = []; // { x, y, radius, color }
-    this.rectangles = []; // { x1, y1, x2, y2, color }
     this.offsetX = 0;
     this.offsetY = 0;
     this.scale = 1;
@@ -20,6 +18,18 @@ export default class CanvasEngine {
     this.onCanvasClick = null; // Callback for canvas clicks
     this.onCanvasRectangleClick = null;
     this.gridSpacing = 20; // ✅ Default spacing
+
+    //  globally save the data
+    this.scene = {
+      commentDetails: null,
+      activeTab: null,
+      selectedQuery: null,
+      seeAllDots: false,
+      color: null,
+      isDotMode: false,
+      rectangleMode: false,
+    };
+
     window.canvasEngine = this; // 👈 expose globally
 
     this.gridColor = "#444"; // default grid color
@@ -33,6 +43,12 @@ export default class CanvasEngine {
     this.startY = 0;
 
     this.bindEvents();
+  }
+
+  // setting up the data in window object
+  setData(data) {
+    this.scene = data;
+    console.log("Yes it setting up" , this.scene);
   }
 
   setupCanvas() {
@@ -56,6 +72,7 @@ export default class CanvasEngine {
     );
     this.canvas.addEventListener("mouseup", this.customStopDrag.bind(this));
   }
+
   customStartDrag(e) {
     if (this.onCanvasRectangleClick) {
       const rect = this.canvas.getBoundingClientRect();
@@ -87,12 +104,14 @@ export default class CanvasEngine {
       const height = yur - yll;
 
       if (width === 0 || height === 0) {
-        // console.warn("Ignored empty rectangle");
         return;
       }
 
-      this.drawRectangle(this.startX, this.startY, endX, endY);
-      // bbox({ xll, yll, xur, yur });
+      const bbox = { xll, yll, xur, yur };
+
+      // this.drawRectangle(this.startX, this.startY, endX, endY);
+
+      this.onCanvasRectangleClick(bbox);
     }
   }
 
@@ -100,14 +119,9 @@ export default class CanvasEngine {
   drawDot(x, y, radius, color = "red") {
     const ctx = this.ctx;
     if (!ctx) return;
-    // to push co ordinates on dots arr for further use
-    // if (store) {
-    //   this.dots.push({ x, y, radius, color });
-    // }
     ctx.save();
     ctx.translate(this.offsetX, this.offsetY);
     ctx.scale(this.scale, this.scale);
-
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, 2 * Math.PI);
     ctx.fillStyle = color;
@@ -158,57 +172,9 @@ export default class CanvasEngine {
     this.onCanvasClick = handler;
   }
 
-  // handleCanvasRectangleClick(bbox) {
-  //   if (this.onCanvasRectangleClick) {
-  //     console.log("object");
-  //     let isDrawing = false;
-  //     let startX = 0,
-  //       startY = 0;
-
-  //     this.canvas.onmousedown = (e) => {
-  //       const rect = this.canvas.getBoundingClientRect();
-  //       startX = e.clientX - rect.left;
-  //       startY = e.clientY - rect.top;
-  //       isDrawing = true;
-  //     };
-
-  //     this.canvas.onmouseup = (e) => {
-  //       if (!isDrawing) return;
-  //       isDrawing = false;
-
-  //       const rect = this.canvas.getBoundingClientRect();
-  //       const endX = e.clientX - rect.left;
-  //       const endY = e.clientY - rect.top;
-
-  //       const xll = Math.min(startX, endX);
-  //       const yll = Math.min(startY, endY);
-  //       const xur = Math.max(startX, endX);
-  //       const yur = Math.max(startY, endY);
-
-  //       const width = xur - xll;
-  //       const height = yur - yll;
-
-  //       if (width === 0 || height === 0) {
-  //         // console.warn("Ignored empty rectangle");
-  //         return;
-  //       }
-
-  //       this.drawRectangle(startX, startY, endX, endY);
-  //       bbox({ xll, yll, xur, yur });
-  //     };
-  //   }
-  // }
-
+  // handler to draw the rectangle
   setCanvasRectangleClickHandler(handler) {
-    console.log("setCanvasRectangleClickHandler with value", handler);
     this.onCanvasRectangleClick = handler;
-  }
-
-  // handle dots for zoom with react state
-
-  setExternalDots(dotsArray = []) {
-    this.externalDots = dotsArray;
-    this.draw(); // force redraw including dots
   }
 
   // handle zoom
@@ -227,7 +193,6 @@ export default class CanvasEngine {
     this.offsetY = mouseY - worldY * newScale;
     this.scale = newScale;
     this.draw();
-    this.drawDot();
   }
 
   drawGrid() {
@@ -443,9 +408,5 @@ export default class CanvasEngine {
     ctx.strokeStyle = "#ff0000";
     ctx.stroke();
     ctx.restore();
-    const dots = this.externalDots || [];
-    for (let { x, y, radius, color } of dots) {
-      this.drawDot(x, y, radius || 4, color || "red");
-    }
   }
 }

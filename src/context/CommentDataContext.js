@@ -6,21 +6,21 @@ const CommentDataContext = createContext();
 export const useCommentData = () => useContext(CommentDataContext);
 
 export const CommentDataProvider = ({ children }) => {
-  //
+  // tabs
   const tabs = ["bug", "improvement", "query"];
-  //
+  // active tabs
   const [activeTab, setActiveTab] = useState(tabs[0]);
-  //
+  //edit mode on off
   const [editable, setEditable] = useState(false);
-  //
+  // draw dot mode
   const [isDotMode, setisDotMode] = useState(false);
-  //
+  // rectangle mode
   const [rectangleMode, setrectangleMode] = useState(false);
-  //
+  //selected bug / improvement / query
   const [selectedQuery, setSelectedQuery] = useState(null);
-  //
+  //see  all bugs / impr / query
   const [seeAllDots, setseeAllDots] = useState(false);
-  //
+  // Global data structure to hold all meta data
   const [commentDetails, setCommentDetails] = useState({
     design_name: null || "Logicknots",
     bug: [],
@@ -29,8 +29,8 @@ export const CommentDataProvider = ({ children }) => {
   });
   const username = "Logicknots";
   console.log(commentDetails);
-  //function to draw a dot
 
+  //function to draw a dot
   const drawDotEventHandler = (x, y) => {
     if (!isDotMode) return;
     const now = new Date();
@@ -62,12 +62,10 @@ export const CommentDataProvider = ({ children }) => {
 
   //function to save drawed rectangle
   const addRectangleToComment = (rectBBox) => {
-    console.log(rectangleMode);
-    if (!rectangleMode) return ;
+    if (!rectangleMode) return;
     if (selectedQuery == null) {
       return alert("First add the bug ");
     }
-    console.log(rectBBox);
     setCommentDetails((prev) => {
       const updatedTab = prev[activeTab].map((comment) => {
         if (comment.id === selectedQuery.id) {

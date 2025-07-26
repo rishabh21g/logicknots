@@ -27,7 +27,6 @@ const CanvasBoard = () => {
   } else if (activeTab === "query") {
     color = "green";
   }
-
   // Draw a canavs first
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -36,6 +35,28 @@ const CanvasBoard = () => {
       window.canvasEngine = engineRef.current;
     }
   }, []);
+
+  // setting up the comment details in window object
+  useEffect(() => {
+    if (!engineRef.current) return;
+    engineRef.current.setData({
+      commentDetails,
+      activeTab,
+      selectedQuery,
+      seeAllDots,
+      color,
+      isDotMode,
+      rectangleMode,
+    });
+  }, [
+    commentDetails,
+    activeTab,
+    selectedQuery,
+    seeAllDots,
+    color,
+    isDotMode,
+    rectangleMode,
+  ]);
 
   // for dot
   useEffect(() => {
@@ -50,10 +71,35 @@ const CanvasBoard = () => {
       engineRef.current.drawDot(x, y, 4, color);
       setisDotMode(false);
     });
-  }, [isDotMode, activeTab]);
+  }, [isDotMode]);
+
+  //draw rectangle
+  useEffect(() => {
+    if (!engineRef.current) {
+      return;
+    }
+    if (!rectangleMode) {
+      return engineRef.current.setCanvasRectangleClickHandler(null);
+    }
+    if (selectedQuery == null) {
+      return;
+    }
+    engineRef.current.setCanvasRectangleClickHandler((bbox) => {
+      engineRef.current.drawRectangle(
+        bbox.xll,
+        bbox.yll,
+        bbox.xur,
+        bbox.yur,
+        color
+      );
+
+      addRectangleToComment(bbox);
+      // setRectangleDrawHandler
+    });
+  }, [rectangleMode]);
 
   //only show the selected query dots and rectangles
-  useEffect(() => {
+  useEffect(() => { 
     if (!engineRef.current) return;
 
     engineRef.current.clearCanvas();
@@ -68,33 +114,10 @@ const CanvasBoard = () => {
     if (selectedQuery?.rectangle?.length) {
       selectedQuery.rectangle.forEach(({ bbox }) => {
         const { xll, yll, xur, yur } = bbox;
-        console.log("Code is running");
         engineRef.current.drawRectangle(xll, yll, xur, yur, color);
       });
     }
-  }, [selectedQuery]);
-
-  //draw rectangle
-  useEffect(() => {
-    console.log("Rectangle mode toggle", rectangleMode);
-    if (!engineRef.current) {
-      console.log("Rectangle", rectangleMode);
-
-      return;
-    }
-    if (!rectangleMode) {
-      console.log("mode", rectangleMode);
-      return engineRef.current.setCanvasRectangleClickHandler(null);
-    }
-    if (selectedQuery == null) {
-      console.log("asdsad", rectangleMode);
-      return;
-    }
-    engineRef.current.setCanvasRectangleClickHandler((bbox) => {
-      addRectangleToComment(bbox);
-      // setRectangleDrawHandler
-    });
-  }, [rectangleMode]);
+  }, [selectedQuery ]);
 
   // to see all dots on toggle
   useEffect(() => {
@@ -118,38 +141,7 @@ const CanvasBoard = () => {
     }
   }, [seeAllDots, activeTab]);
 
-  //handle zoom redraw dots
-  useEffect(() => {
-    if (!engineRef.current) return;
-    const engine = engineRef.current;
 
-    const dots = [];
-
-    if (seeAllDots) {
-      const queries = commentDetails[activeTab] || [];
-      for (let query of queries) {
-        if (query.points) {
-          dots.push({
-            x: query.points.x,
-            y: -query.points.y,
-            radius: 4,
-            color,
-          });
-
-          engine.setExternalDots(dots);
-        }
-      }
-    } else if (selectedQuery?.points) {
-      dots.push({
-        x: selectedQuery.points.x,
-        y: -selectedQuery.points.y,
-        radius: 4,
-        color,
-      });
-
-      engine.setExternalDots(dots);
-    }
-  }, [seeAllDots, selectedQuery, activeTab]);
 
   return (
     <div className=" w-full h-screen bg-black relative">

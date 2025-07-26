@@ -10,6 +10,10 @@ const TabHeader = () => {
     commentDetails,
     seeAllDots,
     setseeAllDots,
+    setrectangleMode,
+    setisDotMode,
+    setSelectedQuery
+    
   } = useCommentData();
 
   return (
@@ -32,6 +36,11 @@ const TabHeader = () => {
               onClick={() => {
                 setActiveTab(tab);
                 window.canvasEngine.clearCanvas();
+                setrectangleMode(false);
+                setisDotMode(false);
+                setseeAllDots(false)
+                setSelectedQuery(null)
+                
               }}
             >
               {tab}
@@ -40,7 +49,9 @@ const TabHeader = () => {
             {/* Visibility Toggle only for Active Tab */}
             {tab === activeTab && (
               <button
-                className={`absolute -top-2 -right-1 ${seeAllDots?"text-blue-600":"text-gray-400"} `}
+                className={`absolute -top-2 -right-1 ${
+                  seeAllDots ? "text-blue-600" : "text-gray-400"
+                } `}
                 onClick={() => setseeAllDots(!seeAllDots)}
               >
                 {seeAllDots ? (
