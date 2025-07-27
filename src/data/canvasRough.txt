@@ -1,0 +1,705 @@
+// // ✅ Modular and readable CanvasEngine.js with original logic preserved
+
+// // ⬇️ Outside class export default CanvasEngine
+
+// export default class CanvasEngine {
+//   constructor(canvas) {
+//     this.canvas = canvas;
+//     this.ctx = canvas.getContext("2d");
+//     this.dpr = window.devicePixelRatio || 1;
+//     this.showGrid = true;
+//     this.offsetX = 0;
+//     this.offsetY = 0;
+//     this.scale = 1;
+//     this.isPanning = false;
+//     this.isDragging = false;
+//     this.dragOffset = { x: 0, y: 0 };
+//     this.dragTarget = null;
+//     this.onCanvasClick = null; // Callback for canvas clicks
+//     this.onCanvasRectangleClick = null;
+//     this.gridSpacing = 20; // ✅ Default spacing
+
+//     //  globally save the data
+//     this.scene = {
+//       commentDetails: null,
+//       activeTab: null,
+//       selectedQuery: null,
+//       seeAllDots: false,
+//       color: null,
+//       isDotMode: false,
+//       rectangleMode: false,
+//     };
+
+//     window.canvasEngine = this; // 👈 expose globally
+
+//     this.gridColor = "#444"; // default grid color
+
+//     this.startPan = { x: 0, y: 0 };
+//     this.setupCanvas();
+
+//     this.isDrawing = false;
+//     this.dashOffset = 0; // animation ke liye offset
+//     this.startX = 0;
+//     this.startY = 0;
+
+//     this.bindEvents();
+//   }
+
+//   // setting up the data in window object
+//   setData(data) {
+//     this.scene = data;
+//     console.log(this.scene)
+//   }
+
+//   setupCanvas() {
+//     const rect = this.canvas.getBoundingClientRect();
+//     this.canvas.width = rect.width * this.dpr;
+//     this.canvas.height = rect.height * this.dpr;
+//     this.ctx.scale(this.dpr, this.dpr);
+
+//     // ✅ Center origin
+//     this.offsetX = this.canvas.width / (2 * this.dpr);
+//     this.offsetY = this.canvas.height / (2 * this.dpr);
+//   }
+
+//   bindEvents() {
+//     this.canvas.addEventListener("wheel", this.handleZoom.bind(this));
+//     this.canvas.addEventListener("click", this.handleCanvasClick.bind(this));
+//     this.canvas.addEventListener("mousedown", this.customStartDrag.bind(this));
+//     this.canvas.addEventListener(
+//       "mousemove",
+//       this.customPerformDrag.bind(this)
+//     );
+//     this.canvas.addEventListener("mouseup", this.customStopDrag.bind(this));
+//   }
+
+//   customStartDrag(e) {
+//     if (this.onCanvasRectangleClick) {
+//       const rect = this.canvas.getBoundingClientRect();
+//       this.startX = e.clientX - rect.left;
+//       this.startY = e.clientY - rect.top;
+//       this.isDrawing = true;
+//     }
+//   }
+//   customPerformDrag(e) {
+//     if (this.onCanvasRectangleClick) {
+//     }
+//   }
+//   // customStopDrag(e) {
+//   //   let isDrawing = this.isDrawing;
+//   //   if (this.onCanvasRectangleClick) {
+//   //     if (!isDrawing) return;
+//   //     isDrawing = false;
+
+//   //     const rect = this.canvas.getBoundingClientRect();
+//   //     const endX = e.clientX - rect.left;
+//   //     const endY = e.clientY - rect.top;
+
+//   //     const xll = Math.min(this.startX, endX);
+//   //     const yll = Math.min(this.startY, endY);
+//   //     const xur = Math.max(this.startX, endX);
+//   //     const yur = Math.max(this.startY, endY);
+
+//   //     const width = xur - xll;
+//   //     const height = yur - yll;
+
+//   //     if (width === 0 || height === 0) {
+//   //       return;
+//   //     }
+
+//   //     const bbox = { xll, yll, xur, yur };
+
+//   //     // this.drawRectangle(this.startX, this.startY, endX, endY);
+
+//   //     this.onCanvasRectangleClick(bbox);
+//   //   }
+//   // }
+//   customStopDrag(e) {
+//   if (!this.isDrawing || !this.onCanvasRectangleClick) return;
+//   this.isDrawing = false;
+
+//   const rect = this.canvas.getBoundingClientRect();
+
+//   // Mouse ke final position (canvas ke respect me)
+//   const endCanvasX = e.clientX - rect.left;
+//   const endCanvasY = e.clientY - rect.top;
+
+//   // Start point ko world coordinate me convert karo
+//   const startWorldX = (this.startX - this.offsetX) / this.scale;
+//   const startWorldY = (this.startY - this.offsetY) / this.scale;
+
+//   // End point ko world coordinate me convert karo
+//   const endWorldX = (endCanvasX - this.offsetX) / this.scale;
+//   const endWorldY = (endCanvasY - this.offsetY) / this.scale;
+
+//   // Bbox world coordinates me
+//   const xll = Math.min(startWorldX, endWorldX);
+//   const yll = Math.min(startWorldY, endWorldY);
+//   const xur = Math.max(startWorldX, endWorldX);
+//   const yur = Math.max(startWorldY, endWorldY);
+
+//   const width = xur - xll;
+//   const height = yur - yll;
+
+//   if (width === 0 || height === 0) return;
+
+//   const bbox = { xll, yll, xur, yur };
+
+//   // Pass world coords (zoom ke saath correct rahenge)
+//   this.onCanvasRectangleClick(bbox);
+//   this.draw()
+// }
+
+
+//   //add dot for bug improvement and query
+//   drawDot(x, y, radius, color = "red") {
+//     const ctx = this.ctx;
+//     if (!ctx) return;
+//     ctx.save();
+//     ctx.translate(this.offsetX, this.offsetY);
+//     ctx.scale(this.scale, this.scale);
+//     ctx.beginPath();
+//     ctx.arc(x, y, radius, 0, 2 * Math.PI);
+//     ctx.fillStyle = color;
+//     ctx.fill();
+//     ctx.restore();
+//   }
+
+//   // function to draw a rectangle
+
+//   // drawRectangle(x1, y1, x2, y2, color = "red") {
+//   //   const ctx = this.ctx;
+//   //   if (!ctx) return;
+//   //   const width = x2 - x1;
+//   //   const height = y2 - y1;
+//   //   ctx.strokeStyle = color;
+//   //   ctx.lineWidth = 2;
+//   //   ctx.strokeRect(x1, y1, width, height);
+//   // }
+// drawRectangle(x1, y1, x2, y2, color = "red") {
+//   const ctx = this.ctx;
+//   if (!ctx) return;
+//   const width = x2 - x1;
+//   const height = y2 - y1;
+//   ctx.beginPath();
+//   ctx.strokeStyle = color;
+//   ctx.lineWidth = 2 / this.scale; // zoom pe line thin/consistent rahegi
+//   ctx.strokeRect(x1, y1, width, height);
+// }
+
+
+//   setRectangleDrawHandler(bbox) {}
+
+//   // function to clear canvas
+
+//   clearCanvas() {
+//     const width = this.canvas.width / this.dpr;
+//     const height = this.canvas.height / this.dpr;
+//     this.ctx.save();
+//     this.ctx.clearRect(0, 0, width, height);
+//     this.ctx.restore();
+//     this.draw(); // redraw grid and axis
+//   }
+
+//   handleCanvasClick(e) {
+//     if (this.onCanvasClick) {
+//       const rect = this.canvas.getBoundingClientRect();
+//       const canvasX = e.clientX - rect.left;
+//       const canvasY = e.clientY - rect.top;
+
+//       // Transform screen coordinates to world coordinates
+//       const worldX = (canvasX - this.offsetX) / this.scale;
+//       const worldY = (canvasY - this.offsetY) / this.scale;
+
+//       this.onCanvasClick(worldX, worldY, e);
+//     }
+//   }
+
+//   setCanvasClickHandler(handler) {
+//     this.onCanvasClick = handler;
+//   }
+
+//   // handler to draw the rectangle
+//   setCanvasRectangleClickHandler(handler) {
+//     this.onCanvasRectangleClick = handler;
+//   }
+
+//   // handle zoom
+//   handleZoom(e) {
+//     e.preventDefault();
+//     const zoomFactor = 1.1;
+//     const rect = this.canvas.getBoundingClientRect();
+//     const mouseX = e.clientX - rect.left;
+//     const mouseY = e.clientY - rect.top;
+//     const worldX = (mouseX - this.offsetX) / this.scale;
+//     const worldY = (mouseY - this.offsetY) / this.scale;
+//     const zoomIn = e.deltaY < 0;
+//     const scaleChange = zoomIn ? zoomFactor : 1 / zoomFactor;
+//     const newScale = Math.max(0.001, Math.min(100, this.scale * scaleChange));
+//     this.offsetX = mouseX - worldX * newScale;
+//     this.offsetY = mouseY - worldY * newScale;
+//     this.scale = newScale;
+//     this.draw();
+//   }
+
+//   drawGrid() {
+//     const ctx = this.ctx;
+//     const spacing = this.gridSpacing; // 👈 dynamic value
+//     const width = this.canvas.width / this.dpr;
+//     const height = this.canvas.height / this.dpr;
+//     ctx.strokeStyle = this.gridColor || "#444";
+
+//     ctx.save();
+//     ctx.clearRect(0, 0, width, height);
+//     ctx.translate(this.offsetX, this.offsetY);
+//     ctx.scale(this.scale, this.scale);
+
+//     const startX = -this.offsetX / this.scale;
+//     const startY = -this.offsetY / this.scale;
+//     const endX = startX + width / this.scale;
+//     const endY = startY + height / this.scale;
+
+//     const firstX = Math.floor(startX / spacing) * spacing;
+//     const firstY = Math.floor(startY / spacing) * spacing;
+
+//     ctx.beginPath();
+//     for (let x = firstX; x <= endX; x += spacing) {
+//       ctx.moveTo(x, startY);
+//       ctx.lineTo(x, endY);
+//     }
+//     for (let y = firstY; y <= endY; y += spacing) {
+//       ctx.moveTo(startX, y);
+//       ctx.lineTo(endX, y);
+//     }
+
+//     ctx.lineWidth = 1 / this.scale;
+//     ctx.stroke();
+//     ctx.restore();
+//   }
+//   setGridSpacing(spacing) {
+//     this.gridSpacing = spacing;
+//     this.draw();
+//   }
+
+//   startDrag(e) {
+//     // this.recordState();
+//     if (!this.selectedObjects?.length) return;
+
+//     const x = (e.offsetX - this.offsetX) / this.scale;
+//     const y = (e.offsetY - this.offsetY) / this.scale;
+
+//     // Check if clicked inside any selected object
+//     for (let obj of this.selectedObjects) {
+//       const item = obj.ref;
+//       if (obj.type === "rectangle") {
+//         if (
+//           x >= item.x &&
+//           x <= item.x + item.width &&
+//           y >= item.y &&
+//           y <= item.y + item.height
+//         ) {
+//           this.dragStart = { x, y };
+//           this.initialPositions = this.selectedObjects.map((obj) => ({
+//             id: obj.id,
+//             type: obj.type,
+//             startX: obj.ref.x,
+//             startY: obj.ref.y,
+//           }));
+//           this.isDragging = true;
+//           return;
+//         }
+//       } else if (obj.type === "label") {
+//         const width = this.ctx.measureText(item.text).width;
+//         const height = item.fontSize;
+//         if (
+//           x >= item.x &&
+//           x <= item.x + width &&
+//           y <= item.y &&
+//           y >= item.y - height
+//         ) {
+//           if (item.locked) {
+//             console.log("🔒 Cannot drag locked label");
+//             return;
+//           }
+//           this.dragStart = { x, y };
+//           this.initialPositions = this.selectedObjects.map((obj) => ({
+//             id: obj.id,
+//             type: obj.type,
+//             startX: obj.ref.x,
+//             startY: obj.ref.y,
+//           }));
+//           this.isDragging = true;
+//           return;
+//         }
+//       }
+//     }
+//   }
+
+//   performDrag(e) {
+//     if (!this.isDragging || !this.dragStart || !this.initialPositions) return;
+
+//     const x = (e.offsetX - this.offsetX) / this.scale;
+//     const y = (e.offsetY - this.offsetY) / this.scale;
+
+//     const dx = this.snapToGrid(x - this.dragStart.x);
+//     const dy = this.snapToGrid(y - this.dragStart.y);
+
+//     for (let obj of this.selectedObjects) {
+//       if (obj.type === "label" && obj.ref.locked) {
+//         console.log("🔒 Skip dragging locked label");
+//         continue;
+//       }
+//       const init = this.initialPositions.find(
+//         (init) => init.id === obj.id && init.type === obj.type
+//       );
+//       if (init) {
+//         obj.ref.x = init.startX + dx;
+//         obj.ref.y = init.startY + dy;
+//       }
+//     }
+
+//     this.draw();
+//   }
+
+//   stopDrag() {
+//     this.isDragging = false;
+//     this.dragStart = null;
+//     this.initialPositions = null;
+//   }
+
+//   enterMultiMoveMode() {
+//     if (!this.selectedObjects.length) return;
+//     this.isMultiMoveMode = true;
+//     this.isDragging = false; // ❌ Not dragging immediately
+//     console.log("🚀 Multi-Move Mode READY (waiting for click)");
+//   }
+
+//   startMultiMoveFromClick(e) {
+//     this.recordState();
+//     if (!this.isMultiMoveMode) return;
+
+//     const pointerX = (e.offsetX - this.offsetX) / this.scale;
+//     const pointerY = (e.offsetY - this.offsetY) / this.scale;
+
+//     this.dragStart = { x: pointerX, y: pointerY };
+//     this.initialPositions = this.selectedObjects.map((obj) => ({
+//       id: obj.id,
+//       type: obj.type,
+//       startX: obj.ref.x,
+//       startY: obj.ref.y,
+//     }));
+
+//     this.isDragging = true;
+//     this.isMultiMoveMode = false; // ✅ Click ke baad mode off
+//     console.log("🎯 Multi-Move STARTED from click:", this.dragStart);
+//   }
+
+//   updateMultiMoveFollow(e) {
+//     if (!this.isDragging || !this.initialPositions) return;
+
+//     const x = (e.offsetX - this.offsetX) / this.scale;
+//     const y = (e.offsetY - this.offsetY) / this.scale;
+
+//     const dx = this.snapToGrid(x - this.dragStart.x);
+//     const dy = this.snapToGrid(y - this.dragStart.y);
+
+//     for (let obj of this.selectedObjects) {
+//       const init = this.initialPositions.find(
+//         (init) => init.id === obj.id && init.type === obj.type
+//       );
+//       if (init) {
+//         obj.ref.x = init.startX + dx;
+//         obj.ref.y = init.startY + dy;
+//       }
+//     }
+
+//     this.draw();
+//   }
+
+//   exitMultiMoveMode() {
+//     this.isMultiMoveMode = false;
+//     this.isDragging = false;
+//     this.dragStart = null;
+//     this.initialPositions = null;
+//     console.log("🛑 Multi-Move Mode OFF");
+//   }
+
+//   // draw() {
+//   //   const ctx = this.ctx;
+
+//   //   if (this.showGrid) {
+//   //     this.drawGrid();
+//   //   } else {
+//   //     ctx.save();
+//   //     ctx.clearRect(
+//   //       0,
+//   //       0,
+//   //       this.canvas.width / this.dpr,
+//   //       this.canvas.height / this.dpr
+//   //     );
+//   //     ctx.restore();
+//   //   }
+
+//   //   // ✅ DRAW CROSS ORIGIN AXIS (always visible and 1px thin)
+//   //   ctx.save();
+//   //   ctx.translate(this.offsetX, this.offsetY);
+//   //   ctx.scale(this.scale, this.scale);
+
+//   //   ctx.beginPath();
+//   //   ctx.moveTo(-100000, 0);
+//   //   ctx.lineTo(100000, 0);
+//   //   ctx.moveTo(0, -100000);
+//   //   ctx.lineTo(0, 100000);
+
+//   //   ctx.lineWidth = 1 / this.scale;
+//   //   ctx.strokeStyle = "#ff0000";
+//   //   ctx.stroke();
+//   //   ctx.restore();
+//   // }
+
+
+
+
+//   draw() {
+//   const ctx = this.ctx;
+//   const {
+//     commentDetails,
+//     activeTab,
+//     selectedQuery,
+//     seeAllDots,
+//     color,
+//   } = this.scene || {};
+
+//   // Clear background and draw grid/axis
+//   if (this.showGrid) {
+//     this.drawGrid();
+//   } else {
+//     ctx.save();
+//     ctx.clearRect(
+//       0,
+//       0,
+//       this.canvas.width / this.dpr,
+//       this.canvas.height / this.dpr
+//     );
+//     ctx.restore();
+//   }
+
+//   // Always draw cross origin axis
+//   ctx.save();
+//   ctx.translate(this.offsetX, this.offsetY);
+//   ctx.scale(this.scale, this.scale);
+
+//   ctx.beginPath();
+//   ctx.moveTo(-100000, 0);
+//   ctx.lineTo(100000, 0);
+//   ctx.moveTo(0, -100000);
+//   ctx.lineTo(0, 100000);
+
+//   ctx.lineWidth = 1 / this.scale;
+//   ctx.strokeStyle = "#ff0000";
+//   ctx.stroke();
+//   ctx.restore();
+
+//   // --- Custom drawing below ---
+
+//   // 1) Guard: agar koi data hi nahi hai
+//   if (!commentDetails || !activeTab) {
+//     return;
+//   }
+
+//   // 2) If seeAllDots mode is ON → saare dots draw karo
+//   if (seeAllDots) {
+//     const queries = commentDetails[activeTab] || [];
+//     queries.forEach((query) => {
+//       if (query.points) {
+//         const { x, y } = query.points;
+//         this.drawDot(x, -y, 4, color);
+//       }
+//     });
+//     return; // DONE
+//   }
+
+//   // 3) Agar selectedQuery available hai → uska dot and rectangles draw karo
+//   if (selectedQuery) {
+//     if (selectedQuery.points) {
+//       const { x, y } = selectedQuery.points;
+//       this.drawDot(x, -y, 4, color);
+//     }
+
+//     if (selectedQuery.rectangle?.length) {
+//       selectedQuery.rectangle.forEach((rectObj) => {
+//         if (!rectObj.bbox) return;
+//         const { xll, yll, xur, yur } = rectObj.bbox;
+//         this.drawRectangle(xll, yll, xur, yur, color);
+//       });
+//     }
+//   }
+// }
+
+// }
+
+
+
+CanavasBoard before
+
+
+// import React, { useEffect, useRef } from "react";
+// import CanvasEngine from "../canvas/CanvasEngine";
+// import { useCommentData } from "../context/CommentDataContext";
+
+// const CanvasBoard = () => {
+//   const canvasRef = useRef(null);
+//   const engineRef = useRef(null);
+//   const {
+//     isDotMode,
+//     setisDotMode,
+//     drawDotEventHandler,
+//     selectedQuery,
+//     rectangleMode,
+//     setSelectedQuery,
+//     seeAllDots,
+//     activeTab,
+//     addRectangleToComment,
+//     commentDetails,
+//   } = useCommentData();
+
+//   // change the color on the basis of active tab
+//   let color = "";
+//   if (activeTab === "bug") {
+//     color = "red";
+//   } else if (activeTab === "improvement") {
+//     color = "blue";
+//   } else if (activeTab === "query") {
+//     color = "green";
+//   }
+//   // Draw a canavs first
+//   useEffect(() => {
+//     const canvas = canvasRef.current;
+//     if (canvas && !engineRef.current) {
+//       engineRef.current = new CanvasEngine(canvas);
+//       window.canvasEngine = engineRef.current;
+//     }
+//   }, []);
+
+//   // setting up the comment details in window object
+//   useEffect(() => {
+//     if (!engineRef.current) return;
+//     engineRef.current.setData({
+//       commentDetails,
+//       activeTab,
+//       selectedQuery,
+//       seeAllDots,
+//       color,
+//       isDotMode,
+//       rectangleMode,
+//     });
+//   }, [
+//     commentDetails,
+//     activeTab,
+//     selectedQuery,
+//     seeAllDots,
+//     color,
+//     isDotMode,
+//     rectangleMode,
+//   ]);
+
+//   // for dot
+//   useEffect(() => {
+//     if (!engineRef.current) return;
+
+//     if (!isDotMode) {
+//       return engineRef.current.setCanvasClickHandler(null);
+//     }
+
+//     engineRef.current.setCanvasClickHandler((x, y, e) => {
+//       drawDotEventHandler(x, y);
+//       engineRef.current.drawDot(x, y, 4, color);
+//       setisDotMode(false);
+//     });
+//   }, [isDotMode]);
+
+//   //draw rectangle
+//   useEffect(() => {
+//     if (!engineRef.current) {
+//       return;
+//     }
+//     if (!rectangleMode) {
+//       return engineRef.current.setCanvasRectangleClickHandler(null);
+//     }
+//     if (selectedQuery == null) {
+//       return;
+//     }
+//     engineRef.current.setCanvasRectangleClickHandler((bbox) => {
+//       engineRef.current.drawRectangle(
+//         bbox.xll,
+//         bbox.yll,
+//         bbox.xur,
+//         bbox.yur,
+//         color
+//       );
+
+//       addRectangleToComment(bbox);
+//       // setRectangleDrawHandler
+//     });
+//   }, [rectangleMode]);
+
+//   //only show the selected query dots and rectangles
+//   useEffect(() => { 
+//     if (!engineRef.current) return;
+
+//     engineRef.current.clearCanvas();
+
+//     // Draw the main dot (if exists)
+//     if (selectedQuery?.points) {
+//       const { x, y } = selectedQuery.points;
+//       engineRef.current.drawDot(x, -y, 4, color);
+//     }
+
+//     // Draw all rectangles (if any)
+//     if (selectedQuery?.rectangle?.length) {
+//       selectedQuery.rectangle.forEach(({ bbox }) => {
+//         const { xll, yll, xur, yur } = bbox;
+//         engineRef.current.drawRectangle(xll, yll, xur, yur, color);
+//       });
+//     }
+//   }, [selectedQuery ]);
+
+//   // to see all dots on toggle
+//   useEffect(() => {
+//     if (!engineRef.current) return;
+//     const engine = engineRef.current;
+//     if (seeAllDots) {
+//       setSelectedQuery(null);
+//       engine.clearCanvas();
+
+//       const queries = commentDetails[activeTab] || [];
+
+//       queries.forEach((query) => {
+//         // draw dot
+//         if (query.points) {
+//           const { x, y } = query.points;
+//           engine.drawDot(x, -y, 4, color);
+//         }
+//       });
+//     } else {
+//       engine.clearCanvas();
+//     }
+//   }, [seeAllDots, activeTab]);
+
+
+
+//   return (
+//     <div className=" w-full h-screen bg-black relative">
+//       <canvas
+//         ref={canvasRef}
+//         className={`bg-[#111] w-full h-full block  ${
+//           isDotMode || rectangleMode ? "cursor-crosshair" : "cursor-grab"
+//         } `}
+//       />
+//     </div>
+//   );
+// };
+
+// export default CanvasBoard;
+
+

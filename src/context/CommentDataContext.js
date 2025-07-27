@@ -28,7 +28,6 @@ export const CommentDataProvider = ({ children }) => {
     query: [],
   });
   const username = "Logicknots";
-  console.log(commentDetails);
 
   //function to draw a dot
   const drawDotEventHandler = (x, y) => {

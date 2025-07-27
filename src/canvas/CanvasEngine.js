@@ -1,7 +1,3 @@
-// ✅ Modular and readable CanvasEngine.js with original logic preserved
-
-// ⬇️ Outside class export default CanvasEngine
-
 export default class CanvasEngine {
   constructor(canvas) {
     this.canvas = canvas;
@@ -11,15 +7,17 @@ export default class CanvasEngine {
     this.offsetX = 0;
     this.offsetY = 0;
     this.scale = 1;
+
+    // Dragging / drawing
     this.isPanning = false;
     this.isDragging = false;
-    this.dragOffset = { x: 0, y: 0 };
-    this.dragTarget = null;
-    this.onCanvasClick = null; // Callback for canvas clicks
+    this.onCanvasClick = null;
     this.onCanvasRectangleClick = null;
-    this.gridSpacing = 20; // ✅ Default spacing
+    this.isDrawing = false;
+    this.startX = 0;
+    this.startY = 0;
 
-    //  globally save the data
+    // Data scene (React sync)
     this.scene = {
       commentDetails: null,
       activeTab: null,
@@ -30,25 +28,16 @@ export default class CanvasEngine {
       rectangleMode: false,
     };
 
-    window.canvasEngine = this; // 👈 expose globally
+    window.canvasEngine = this;
 
-    this.gridColor = "#444"; // default grid color
-
-    this.startPan = { x: 0, y: 0 };
     this.setupCanvas();
-
-    this.isDrawing = false;
-    this.dashOffset = 0; // animation ke liye offset
-    this.startX = 0;
-    this.startY = 0;
-
     this.bindEvents();
   }
 
-  // setting up the data in window object
   setData(data) {
     this.scene = data;
-    console.log("Yes it setting up" , this.scene);
+    this.draw(); // redraw whenever scene updates
+    console.log(this.scene)
   }
 
   setupCanvas() {
@@ -57,7 +46,7 @@ export default class CanvasEngine {
     this.canvas.height = rect.height * this.dpr;
     this.ctx.scale(this.dpr, this.dpr);
 
-    // ✅ Center origin
+    // center origin
     this.offsetX = this.canvas.width / (2 * this.dpr);
     this.offsetY = this.canvas.height / (2 * this.dpr);
   }
@@ -66,10 +55,7 @@ export default class CanvasEngine {
     this.canvas.addEventListener("wheel", this.handleZoom.bind(this));
     this.canvas.addEventListener("click", this.handleCanvasClick.bind(this));
     this.canvas.addEventListener("mousedown", this.customStartDrag.bind(this));
-    this.canvas.addEventListener(
-      "mousemove",
-      this.customPerformDrag.bind(this)
-    );
+    this.canvas.addEventListener("mousemove", this.customPerformDrag.bind(this));
     this.canvas.addEventListener("mouseup", this.customStopDrag.bind(this));
   }
 
@@ -81,103 +67,90 @@ export default class CanvasEngine {
       this.isDrawing = true;
     }
   }
+
   customPerformDrag(e) {
-    if (this.onCanvasRectangleClick) {
-    }
+   
   }
+
   customStopDrag(e) {
-    let isDrawing = this.isDrawing;
-    if (this.onCanvasRectangleClick) {
-      if (!isDrawing) return;
-      isDrawing = false;
+    if (!this.isDrawing || !this.onCanvasRectangleClick) return;
+    this.isDrawing = false;
 
-      const rect = this.canvas.getBoundingClientRect();
-      const endX = e.clientX - rect.left;
-      const endY = e.clientY - rect.top;
+    const rect = this.canvas.getBoundingClientRect();
 
-      const xll = Math.min(this.startX, endX);
-      const yll = Math.min(this.startY, endY);
-      const xur = Math.max(this.startX, endX);
-      const yur = Math.max(this.startY, endY);
+    const endCanvasX = e.clientX - rect.left;
+    const endCanvasY = e.clientY - rect.top;
 
-      const width = xur - xll;
-      const height = yur - yll;
+    // convert to world coords
+    const startWorldX = (this.startX - this.offsetX) / this.scale;
+    const startWorldY = (this.startY - this.offsetY) / this.scale;
+    const endWorldX = (endCanvasX - this.offsetX) / this.scale;
+    const endWorldY = (endCanvasY - this.offsetY) / this.scale;
 
-      if (width === 0 || height === 0) {
-        return;
-      }
+    const xll = Math.min(startWorldX, endWorldX);
+    const yll = Math.min(startWorldY, endWorldY);
+    const xur = Math.max(startWorldX, endWorldX);
+    const yur = Math.max(startWorldY, endWorldY);
 
-      const bbox = { xll, yll, xur, yur };
+    if (xur - xll === 0 || yur - yll === 0) return;
 
-      // this.drawRectangle(this.startX, this.startY, endX, endY);
+    const bbox = { xll, yll, xur, yur };
 
-      this.onCanvasRectangleClick(bbox);
-    }
+    // update scene via callback
+    this.onCanvasRectangleClick(bbox);
+
+    // redraw with new rectangle
+    this.draw();
   }
 
-  //add dot for bug improvement and query
+  // Drawing primitives 
   drawDot(x, y, radius, color = "red") {
     const ctx = this.ctx;
-    if (!ctx) return;
-    ctx.save();
-    ctx.translate(this.offsetX, this.offsetY);
-    ctx.scale(this.scale, this.scale);
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, 2 * Math.PI);
     ctx.fillStyle = color;
     ctx.fill();
-    ctx.restore();
   }
 
-  // function to draw a rectangle
-
+  //Drawing rectangle fn
   drawRectangle(x1, y1, x2, y2, color = "red") {
     const ctx = this.ctx;
-    if (!ctx) return;
-    const width = x2 - x1;
-    const height = y2 - y1;
+    ctx.beginPath();
     ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x1, y1, width, height);
+    ctx.lineWidth = 2 / this.scale;
+    ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
   }
 
-  setRectangleDrawHandler(bbox) {}
-
-  // function to clear canvas
-
+  //clear canvas fn
   clearCanvas() {
-    const width = this.canvas.width / this.dpr;
-    const height = this.canvas.height / this.dpr;
-    this.ctx.save();
-    this.ctx.clearRect(0, 0, width, height);
-    this.ctx.restore();
-    this.draw(); // redraw grid and axis
+    const w = this.canvas.width / this.dpr;
+    const h = this.canvas.height / this.dpr;
+    this.ctx.clearRect(0, 0, w, h);
   }
 
+  //handle click fn
   handleCanvasClick(e) {
     if (this.onCanvasClick) {
       const rect = this.canvas.getBoundingClientRect();
       const canvasX = e.clientX - rect.left;
       const canvasY = e.clientY - rect.top;
-
-      // Transform screen coordinates to world coordinates
       const worldX = (canvasX - this.offsetX) / this.scale;
       const worldY = (canvasY - this.offsetY) / this.scale;
-
       this.onCanvasClick(worldX, worldY, e);
     }
   }
 
+  //click handler to pass the callback for click
   setCanvasClickHandler(handler) {
     this.onCanvasClick = handler;
   }
 
-  // handler to draw the rectangle
+  // handler to pass the fn to draw rectangle
   setCanvasRectangleClickHandler(handler) {
     this.onCanvasRectangleClick = handler;
   }
 
-  // handle zoom
+  // handle Zoom fn
   handleZoom(e) {
     e.preventDefault();
     const zoomFactor = 1.1;
@@ -195,12 +168,13 @@ export default class CanvasEngine {
     this.draw();
   }
 
+  // grid fn
   drawGrid() {
     const ctx = this.ctx;
-    const spacing = this.gridSpacing; // 👈 dynamic value
+    const spacing = 20;
     const width = this.canvas.width / this.dpr;
     const height = this.canvas.height / this.dpr;
-    ctx.strokeStyle = this.gridColor || "#444";
+    ctx.strokeStyle = "#444";
 
     ctx.save();
     ctx.clearRect(0, 0, width, height);
@@ -229,184 +203,66 @@ export default class CanvasEngine {
     ctx.stroke();
     ctx.restore();
   }
-  setGridSpacing(spacing) {
-    this.gridSpacing = spacing;
-    this.draw();
-  }
-
-  startDrag(e) {
-    // this.recordState();
-    if (!this.selectedObjects?.length) return;
-
-    const x = (e.offsetX - this.offsetX) / this.scale;
-    const y = (e.offsetY - this.offsetY) / this.scale;
-
-    // Check if clicked inside any selected object
-    for (let obj of this.selectedObjects) {
-      const item = obj.ref;
-      if (obj.type === "rectangle") {
-        if (
-          x >= item.x &&
-          x <= item.x + item.width &&
-          y >= item.y &&
-          y <= item.y + item.height
-        ) {
-          this.dragStart = { x, y };
-          this.initialPositions = this.selectedObjects.map((obj) => ({
-            id: obj.id,
-            type: obj.type,
-            startX: obj.ref.x,
-            startY: obj.ref.y,
-          }));
-          this.isDragging = true;
-          return;
-        }
-      } else if (obj.type === "label") {
-        const width = this.ctx.measureText(item.text).width;
-        const height = item.fontSize;
-        if (
-          x >= item.x &&
-          x <= item.x + width &&
-          y <= item.y &&
-          y >= item.y - height
-        ) {
-          if (item.locked) {
-            console.log("🔒 Cannot drag locked label");
-            return;
-          }
-          this.dragStart = { x, y };
-          this.initialPositions = this.selectedObjects.map((obj) => ({
-            id: obj.id,
-            type: obj.type,
-            startX: obj.ref.x,
-            startY: obj.ref.y,
-          }));
-          this.isDragging = true;
-          return;
-        }
-      }
-    }
-  }
-
-  performDrag(e) {
-    if (!this.isDragging || !this.dragStart || !this.initialPositions) return;
-
-    const x = (e.offsetX - this.offsetX) / this.scale;
-    const y = (e.offsetY - this.offsetY) / this.scale;
-
-    const dx = this.snapToGrid(x - this.dragStart.x);
-    const dy = this.snapToGrid(y - this.dragStart.y);
-
-    for (let obj of this.selectedObjects) {
-      if (obj.type === "label" && obj.ref.locked) {
-        console.log("🔒 Skip dragging locked label");
-        continue;
-      }
-      const init = this.initialPositions.find(
-        (init) => init.id === obj.id && init.type === obj.type
-      );
-      if (init) {
-        obj.ref.x = init.startX + dx;
-        obj.ref.y = init.startY + dy;
-      }
-    }
-
-    this.draw();
-  }
-
-  stopDrag() {
-    this.isDragging = false;
-    this.dragStart = null;
-    this.initialPositions = null;
-  }
-
-  enterMultiMoveMode() {
-    if (!this.selectedObjects.length) return;
-    this.isMultiMoveMode = true;
-    this.isDragging = false; // ❌ Not dragging immediately
-    console.log("🚀 Multi-Move Mode READY (waiting for click)");
-  }
-
-  startMultiMoveFromClick(e) {
-    this.recordState();
-    if (!this.isMultiMoveMode) return;
-
-    const pointerX = (e.offsetX - this.offsetX) / this.scale;
-    const pointerY = (e.offsetY - this.offsetY) / this.scale;
-
-    this.dragStart = { x: pointerX, y: pointerY };
-    this.initialPositions = this.selectedObjects.map((obj) => ({
-      id: obj.id,
-      type: obj.type,
-      startX: obj.ref.x,
-      startY: obj.ref.y,
-    }));
-
-    this.isDragging = true;
-    this.isMultiMoveMode = false; // ✅ Click ke baad mode off
-    console.log("🎯 Multi-Move STARTED from click:", this.dragStart);
-  }
-
-  updateMultiMoveFollow(e) {
-    if (!this.isDragging || !this.initialPositions) return;
-
-    const x = (e.offsetX - this.offsetX) / this.scale;
-    const y = (e.offsetY - this.offsetY) / this.scale;
-
-    const dx = this.snapToGrid(x - this.dragStart.x);
-    const dy = this.snapToGrid(y - this.dragStart.y);
-
-    for (let obj of this.selectedObjects) {
-      const init = this.initialPositions.find(
-        (init) => init.id === obj.id && init.type === obj.type
-      );
-      if (init) {
-        obj.ref.x = init.startX + dx;
-        obj.ref.y = init.startY + dy;
-      }
-    }
-
-    this.draw();
-  }
-
-  exitMultiMoveMode() {
-    this.isMultiMoveMode = false;
-    this.isDragging = false;
-    this.dragStart = null;
-    this.initialPositions = null;
-    console.log("🛑 Multi-Move Mode OFF");
-  }
-
+// re written draw function
   draw() {
     const ctx = this.ctx;
+    const { commentDetails, activeTab, selectedQuery, seeAllDots, color } =
+      this.scene || {};
 
-    if (this.showGrid) {
-      this.drawGrid();
-    } else {
-      ctx.save();
-      ctx.clearRect(
-        0,
-        0,
-        this.canvas.width / this.dpr,
-        this.canvas.height / this.dpr
-      );
-      ctx.restore();
-    }
+    this.clearCanvas();
 
-    // ✅ DRAW CROSS ORIGIN AXIS (always visible and 1px thin)
+    // grid and axis
+    if (this.showGrid) this.drawGrid();
+
     ctx.save();
     ctx.translate(this.offsetX, this.offsetY);
     ctx.scale(this.scale, this.scale);
 
+    // axis
     ctx.beginPath();
     ctx.moveTo(-100000, 0);
     ctx.lineTo(100000, 0);
     ctx.moveTo(0, -100000);
     ctx.lineTo(0, 100000);
-
     ctx.lineWidth = 1 / this.scale;
     ctx.strokeStyle = "#ff0000";
     ctx.stroke();
+
+    // nothing to draw if no data
+    if (!commentDetails || !activeTab) {
+      ctx.restore();
+      return;
+    }
+
+    // seeAllDots mode
+    if (seeAllDots) {
+      const queries = commentDetails[activeTab] || [];
+      queries.forEach((q) => {
+        if (q.points) this.drawDot(q.points.x, -q.points.y, 4, color);
+      });
+      ctx.restore();
+      return;
+    }
+
+    // selectedQuery mode
+    if (selectedQuery) {
+      if (selectedQuery.points) {
+        this.drawDot(
+          selectedQuery.points.x,
+          -selectedQuery.points.y,
+          4,
+          color
+        );
+      }
+      if (selectedQuery.rectangle?.length) {
+        selectedQuery.rectangle.forEach((r) => {
+          const { xll, yll, xur, yur } = r.bbox;
+          this.drawRectangle(xll, yll, xur, yur, color);
+        });
+      }
+    }
+
     ctx.restore();
   }
 }
+

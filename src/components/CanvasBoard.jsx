@@ -11,23 +11,19 @@ const CanvasBoard = () => {
     drawDotEventHandler,
     selectedQuery,
     rectangleMode,
-    setSelectedQuery,
     seeAllDots,
     activeTab,
     addRectangleToComment,
     commentDetails,
   } = useCommentData();
 
-  // change the color on the basis of active tab
+  // Tab color
   let color = "";
-  if (activeTab === "bug") {
-    color = "red";
-  } else if (activeTab === "improvement") {
-    color = "blue";
-  } else if (activeTab === "query") {
-    color = "green";
-  }
-  // Draw a canavs first
+  if (activeTab === "bug") color = "red";
+  else if (activeTab === "improvement") color = "blue";
+  else if (activeTab === "query") color = "green";
+
+  // Initialize engine once
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas && !engineRef.current) {
@@ -36,7 +32,7 @@ const CanvasBoard = () => {
     }
   }, []);
 
-  // setting up the comment details in window object
+  // Update scene data and redraw
   useEffect(() => {
     if (!engineRef.current) return;
     engineRef.current.setData({
@@ -48,6 +44,7 @@ const CanvasBoard = () => {
       isDotMode,
       rectangleMode,
     });
+    engineRef.current.draw();
   }, [
     commentDetails,
     activeTab,
@@ -58,7 +55,7 @@ const CanvasBoard = () => {
     rectangleMode,
   ]);
 
-  // for dot
+  // Dot mode click
   useEffect(() => {
     if (!engineRef.current) return;
 
@@ -68,88 +65,30 @@ const CanvasBoard = () => {
 
     engineRef.current.setCanvasClickHandler((x, y, e) => {
       drawDotEventHandler(x, y);
-      engineRef.current.drawDot(x, y, 4, color);
       setisDotMode(false);
     });
   }, [isDotMode]);
 
-  //draw rectangle
+  // Rectangle mode drag
   useEffect(() => {
-    if (!engineRef.current) {
-      return;
-    }
+    if (!engineRef.current) return;
     if (!rectangleMode) {
       return engineRef.current.setCanvasRectangleClickHandler(null);
     }
-    if (selectedQuery == null) {
-      return;
-    }
-    engineRef.current.setCanvasRectangleClickHandler((bbox) => {
-      engineRef.current.drawRectangle(
-        bbox.xll,
-        bbox.yll,
-        bbox.xur,
-        bbox.yur,
-        color
-      );
+    if (selectedQuery == null) return;
 
+    engineRef.current.setCanvasRectangleClickHandler((bbox) => {
       addRectangleToComment(bbox);
-      // setRectangleDrawHandler
     });
   }, [rectangleMode]);
 
-  //only show the selected query dots and rectangles
-  useEffect(() => { 
-    if (!engineRef.current) return;
-
-    engineRef.current.clearCanvas();
-
-    // Draw the main dot (if exists)
-    if (selectedQuery?.points) {
-      const { x, y } = selectedQuery.points;
-      engineRef.current.drawDot(x, -y, 4, color);
-    }
-
-    // Draw all rectangles (if any)
-    if (selectedQuery?.rectangle?.length) {
-      selectedQuery.rectangle.forEach(({ bbox }) => {
-        const { xll, yll, xur, yur } = bbox;
-        engineRef.current.drawRectangle(xll, yll, xur, yur, color);
-      });
-    }
-  }, [selectedQuery ]);
-
-  // to see all dots on toggle
-  useEffect(() => {
-    if (!engineRef.current) return;
-    const engine = engineRef.current;
-    if (seeAllDots) {
-      setSelectedQuery(null);
-      engine.clearCanvas();
-
-      const queries = commentDetails[activeTab] || [];
-
-      queries.forEach((query) => {
-        // draw dot
-        if (query.points) {
-          const { x, y } = query.points;
-          engine.drawDot(x, -y, 4, color);
-        }
-      });
-    } else {
-      engine.clearCanvas();
-    }
-  }, [seeAllDots, activeTab]);
-
-
-
   return (
-    <div className=" w-full h-screen bg-black relative">
+    <div className="w-full h-screen bg-black relative">
       <canvas
         ref={canvasRef}
-        className={`bg-[#111] w-full h-full block  ${
+        className={`bg-[#111] w-full h-full block ${
           isDotMode || rectangleMode ? "cursor-crosshair" : "cursor-grab"
-        } `}
+        }`}
       />
     </div>
   );
